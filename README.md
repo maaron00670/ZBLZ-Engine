@@ -1,5 +1,6 @@
-# Idea
-Mi idea con este proyecto es crear una alternativa de cheat engine pero a linux.
+# Que es ZBLZ-Engine
+
+ZBLZ-Engine es un proyecto culla finalidad es ser una alternativa de cheat engine pero a linux.
 
 Este proyecto ira escalando de poco en poco, empezando con alguna funcion simple y ya avanzando
 
