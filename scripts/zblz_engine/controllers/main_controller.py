@@ -27,6 +27,11 @@ class MainController:
     - Control speed in real-time for attached processes
     """
     
+    # main_controller.py (Fragmentos a actualizar)
+
+    # Añade esto en el __init__ de MainController para recordar la preferencia
+    # controllers/main_controller.py
+
     def __init__(self, model: AppState):
         self._model = model
         self._view: Optional["MainWindow"] = None
@@ -35,11 +40,43 @@ class MainController:
         self._process_scanner = ProcessScanner()
         self._speed_controller = SpeedController()
         
+        # --- CAMBIA ESTO A FALSE TEMPORALMENTE ---
+        # Así forzamos a que liste todo al arrancar
+        self._show_games_only = False 
+        
         # Set default library path
         self._set_default_library_path()
         
         # Register as observer to react to model changes
         self._model.add_observer(self._on_model_changed)
+
+    # Actualiza el método refresh_processes
+    # controllers/main_controller.py
+
+   # Actualiza el método en controllers/main_controller.py
+
+    def refresh_processes(self, games_only: bool = False) -> None: # Cambiado a False para testear
+        """Refresca la lista y notifica a la UI."""
+        try:
+            if games_only:
+                processes = self._process_scanner.scan_games_only()
+            else:
+                # Obtenemos todos los procesos que NO sean del kernel
+                processes = self._process_scanner.scan_all(include_system=False)
+            
+            # Verificación de inyección (speedhack)
+            for process in processes:
+                process.is_hooked = self._speed_controller.is_process_hooked(process.pid)
+            
+            # Enviamos al modelo. Esto disparará 'processes_updated'
+            self._model.set_processes(processes)
+            
+            if self._view:
+                self._view.show_status(f"Mostrando {len(processes)} procesos.")
+                
+        except Exception as e:
+            if self._view:
+                self._view.show_error(f"Fallo en el motor de escaneo: {str(e)}")
     
     def _set_default_library_path(self) -> None:
         """Set the default speedhack library path."""
