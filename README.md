@@ -1,7 +1,3 @@
-Aquí tienes el contenido del archivo **README.md** traducido íntegramente al español, manteniendo la estructura y el formato original para GitHub.
-
----
-
 # Qué es ZBLZ-Engine
 ZBLZ-Engine es un proyecto cuya finalidad es ser una alternativa de Cheat Engine pero para Linux.
 Este proyecto irá escalando de poco en poco, empezando con alguna función simple y ya avanzando.
@@ -155,5 +151,3 @@ gcc -shared -fPIC -o speedhack.so speedhack.c -ldl
 Licencia MIT
 
 ---
-
-¿Te gustaría que te ayude a redactar alguna sección adicional o a corregir algún detalle técnico de la traducción?
