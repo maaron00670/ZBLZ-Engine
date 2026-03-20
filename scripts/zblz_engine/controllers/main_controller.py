@@ -6,8 +6,10 @@ This controller is designed to be extended with additional sub-controllers
 for features like memory scanning, process attachment, etc.
 """
 
+import os
 from typing import Optional, TYPE_CHECKING
 from models.app_state import AppState, ProcessInfo
+from services.process_scanner import ProcessScanner
 
 if TYPE_CHECKING:
     from views.main_window import MainWindow
@@ -33,12 +35,36 @@ class MainController:
         self._model = model
         self._view: Optional["MainWindow"] = None
         
+        # Initialize process scanner
+        self._process_scanner = ProcessScanner()
+        
+        # Set default library path
+        self._set_default_library_path()
+        
         # Register as observer to react to model changes
         self._model.add_observer(self._on_model_changed)
         
         # Future: Initialize sub-controllers here
         # self._memory_controller = MemoryController(model)
         # self._process_controller = ProcessController(model)
+    
+    def _set_default_library_path(self) -> None:
+        """Set the default speedhack library path."""
+        # Check common locations
+        possible_paths = [
+            os.path.expanduser("~/.local/lib/zblz/libspeedhack.so"),
+            os.path.join(os.path.dirname(os.path.dirname(__file__)), "lib", "libspeedhack.so"),
+            "/usr/local/lib/zblz/libspeedhack.so",
+            "/usr/lib/zblz/libspeedhack.so",
+        ]
+        
+        for path in possible_paths:
+            if os.path.exists(path):
+                self._model.library_path = path
+                return
+        
+        # Default to expected install location
+        self._model.library_path = os.path.expanduser("~/.local/lib/zblz/libspeedhack.so")
     
     def set_view(self, view: "MainWindow") -> None:
         """Connect the view to this controller."""
@@ -148,27 +174,31 @@ class MainController:
     
     # ==================== Process Management (Future) ====================
     
-    def refresh_processes(self) -> None:
+    def refresh_processes(self, games_only: bool = True) -> None:
         """
-        Refresh the process list.
+        Refresh the process list by scanning /proc.
         
-        Future implementation will scan /proc for running processes
-        and identify Wine/Proton games.
+        Args:
+            games_only: If True, only show Wine/Proton/Steam processes
         """
-        # Placeholder for future implementation
-        # This would call a backend service to scan processes
+        try:
+            if games_only:
+                processes = self._process_scanner.scan_games_only()
+            else:
+                processes = self._process_scanner.scan_all(include_system=False)
+            
+            self._model.set_processes(processes)
+            
+            if self._view:
+                count = len(processes)
+                if count == 0:
+                    self._view.show_status("No game processes found. Start a game first.")
+                else:
+                    self._view.show_status(f"Found {count} process(es)")
         
-        # Example of what the backend would return:
-        demo_processes = [
-            ProcessInfo(pid=1234, name="wine-preloader", is_wine_process=True),
-            ProcessInfo(pid=5678, name="proton", is_proton_process=True),
-        ]
-        
-        # For now, just show placeholder
-        self._model.set_processes(demo_processes)
-        
-        if self._view:
-            self._view.show_status("Process scanning not yet implemented")
+        except Exception as e:
+            if self._view:
+                self._view.show_error(f"Error scanning processes: {str(e)}")
     
     def select_process(self, process: ProcessInfo) -> None:
         """Select a process from the list."""

@@ -32,6 +32,7 @@ pip install -r requirements.txt
 
 ## Ejecución
 ```bash
+cd scripts/zblz_engine
 python main.py
 ```
 

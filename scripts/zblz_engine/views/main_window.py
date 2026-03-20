@@ -204,7 +204,7 @@ class MainWindow(QMainWindow):
         
         # Process list
         self._process_list.refresh_requested.connect(
-            self._controller.refresh_processes
+            lambda games_only: self._controller.refresh_processes(games_only)
         )
         self._process_list.process_selected.connect(
             self._controller.select_process

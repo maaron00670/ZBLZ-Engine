@@ -1,160 +1,158 @@
 # ZBLZ Engine
 
-A Linux desktop application for process analysis and speed manipulation, similar to Cheat Engine.
+Linux Game Speed Manipulation Tool - Similar to Cheat Engine's speedhack feature.
 
-## Features
+## How It Works
 
-- **Speed Control**: Generate Steam launch options with custom speed multipliers (0.1x - 5.0x)
-- **Process List**: View running processes (prepared for future attachment features)
-- **Copy to Clipboard**: Easy copy of generated launch commands
-- **Dark Theme**: Modern, clean UI
+ZBLZ Engine uses `LD_PRELOAD` to inject a library that intercepts time-related system calls (`clock_gettime`, `gettimeofday`, `nanosleep`, etc.) and modifies them to speed up or slow down game time.
 
-## Requirements
+### Two Modes of Operation:
 
-- Python 3.8+
-- PyQt5
-- Linux (Debian/Ubuntu/Arch)
+1. **Steam Launch Options** (Current)
+   - Generate a command and paste it in Steam game properties
+   - Works with any game, including Proton/Wine games
+   - Speed is fixed at launch time
 
-## Installation
+2. **Process Attachment** (Future)
+   - Attach to already running games
+   - Change speed in real-time
+
+## Quick Start
+
+### 1. Build the Speedhack Library
 
 ```bash
-# Clone or download the project
-cd zblz_engine
-
-# Create virtual environment (optional but recommended)
-python3 -m venv venv
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
+cd lib/
+chmod +x build.sh
+./build.sh install
 ```
 
-## Running
+This compiles `libspeedhack.so` and installs it to `~/.local/lib/zblz/`.
+
+**Requirements:**
+- GCC: `sudo apt install build-essential`
+- Optional for 32-bit games: `sudo apt install gcc-multilib`
+
+### 2. Run ZBLZ Engine
 
 ```bash
+cd scripts/zblz_engine
+pip install -r requirements.txt
 python main.py
 ```
 
-## Usage
+### 3. Use with Steam Games
 
-1. Adjust the speed multiplier using the slider or preset buttons
-2. Configure the speedhack library path (default: `/usr/lib/zblz/speedhack.so`)
-3. Optionally enable MangoHud or GameMode
-4. Click "Generate Steam Launch Option"
-5. Copy the command and paste it into Steam game properties
+1. In ZBLZ Engine, adjust the speed slider (e.g., 2.0x for double speed)
+2. Click "Generate Command" to create the launch option
+3. In Steam: Right-click game -> Properties -> Set Launch Options
+4. Paste the generated command
+5. Launch the game - it will run at modified speed!
+
+**Example commands:**
+```bash
+# Double speed
+LD_PRELOAD="/home/user/.local/lib/zblz/libspeedhack.so" SPEED=2.00 %command%
+
+# Half speed (slow motion)
+LD_PRELOAD="/home/user/.local/lib/zblz/libspeedhack.so" SPEED=0.50 %command%
+
+# With MangoHud overlay
+mangohud LD_PRELOAD="/home/user/.local/lib/zblz/libspeedhack.so" SPEED=1.50 %command%
+
+# With GameMode for better performance
+gamemoderun LD_PRELOAD="/home/user/.local/lib/zblz/libspeedhack.so" SPEED=2.00 %command%
+```
+
+## Process Scanner
+
+The Process List shows running Wine/Proton/Steam games:
+
+1. Click "Refresh" to scan for running games
+2. Toggle "Games only" to see all processes or just games
+3. Select a process to see details
+
+**Note:** Process attachment for real-time speed control is planned for a future update.
 
 ## Project Structure
 
 ```
 zblz_engine/
-├── main.py                 # Application entry point
-├── requirements.txt        # Python dependencies
-├── README.md              # This file
-│
-├── models/                 # Data models (MVC - Model)
-│   ├── __init__.py
-│   └── app_state.py       # Application state management
-│
-├── views/                  # UI components (MVC - View)
-│   ├── __init__.py
-│   ├── main_window.py     # Main application window
-│   ├── styles.py          # Dark theme styling
-│   └── widgets/           # Reusable UI widgets
-│       ├── __init__.py
-│       ├── speed_control.py
-│       ├── process_list.py
-│       └── command_output.py
-│
-└── controllers/            # Business logic (MVC - Controller)
-    ├── __init__.py
-    └── main_controller.py # Main controller
+├── main.py                    # Application entry point
+├── requirements.txt           # Python dependencies
+├── lib/
+│   ├── speedhack.c           # C library source code
+│   ├── build.sh              # Build script
+│   └── libspeedhack.so       # Compiled library (after build)
+├── models/
+│   └── app_state.py          # Application state (MVC model)
+├── views/
+│   ├── main_window.py        # Main window
+│   ├── styles.py             # Dark theme styling
+│   └── widgets/
+│       ├── speed_control.py  # Speed slider widget
+│       ├── process_list.py   # Process scanner widget
+│       └── command_output.py # Command generator widget
+├── controllers/
+│   └── main_controller.py    # Business logic (MVC controller)
+└── services/
+    └── process_scanner.py    # /proc filesystem scanner
 ```
 
-## Architecture
+## Troubleshooting
 
-The application follows the MVC (Model-View-Controller) pattern:
-
-- **Model** (`models/app_state.py`): Manages application state using observer pattern
-- **View** (`views/`): PyQt5 widgets for UI rendering
-- **Controller** (`controllers/`): Business logic and coordination
-
-## Extending the Application
-
-### Adding a New Feature
-
-1. **Add state to the model** (`models/app_state.py`):
-   ```python
-   # Add properties and methods for your feature
-   @property
-   def my_feature_state(self):
-       return self._my_feature_state
-   ```
-
-2. **Create a widget** (`views/widgets/my_feature.py`):
-   ```python
-   class MyFeatureWidget(QWidget):
-       # Define signals for user interactions
-       action_requested = pyqtSignal()
-   ```
-
-3. **Add controller logic** (`controllers/main_controller.py`):
-   ```python
-   def handle_my_feature(self):
-       # Business logic here
-       pass
-   ```
-
-4. **Integrate into main window** (`views/main_window.py`):
-   ```python
-   # Add widget to layout
-   # Connect signals to controller
-   ```
-
-### Adding Memory Scanning (Future)
-
-1. Create `models/memory_state.py` for scan results
-2. Create `views/widgets/memory_scanner.py` for UI
-3. Create `controllers/memory_controller.py` for ptrace logic
-4. Integrate into the Memory Scanner tab
-
-### Adding Process Attachment (Future)
-
-1. Create backend service using `ptrace` system calls
-2. Add attachment state to `AppState`
-3. Enable real-time speed control via memory manipulation
-
-## Speedhack Library
-
-The speedhack functionality requires a separate C library (`speedhack.so`) that hooks time functions. This library should:
-
-- Hook `gettimeofday`, `clock_gettime`, `time`
-- Read `SPEED` environment variable
-- Scale time values accordingly
-
-Example implementation structure:
-```c
-// speedhack.c
-#define _GNU_SOURCE
-#include <dlfcn.h>
-#include <time.h>
-#include <stdlib.h>
-
-static double speed_factor = 1.0;
-
-__attribute__((constructor))
-void init() {
-    char* speed_env = getenv("SPEED");
-    if (speed_env) speed_factor = atof(speed_env);
-}
-
-// Hook time functions and scale by speed_factor
-```
-
-Compile with:
+### "Library not found" error
+Make sure you've built and installed the library:
 ```bash
-gcc -shared -fPIC -o speedhack.so speedhack.c -ldl
+cd lib/
+./build.sh install
 ```
+
+### Game crashes or doesn't speed up
+- Some games use different timing methods that may not be intercepted
+- Anti-cheat systems may block LD_PRELOAD
+- Try both 32-bit and 64-bit libraries for older games
+
+### Permission denied when scanning processes
+Some processes require root access to read. This is normal for system processes.
+
+### Speed seems inconsistent
+- Physics-based games may have frame-rate dependent physics
+- Online games may sync with server time
+- Some games cap their internal tick rate
+
+## How the Speedhack Works
+
+The `libspeedhack.so` library uses `LD_PRELOAD` to intercept these functions:
+
+| Function | Purpose |
+|----------|---------|
+| `clock_gettime()` | Main timing function (CLOCK_MONOTONIC, CLOCK_REALTIME) |
+| `gettimeofday()` | Legacy timing function |
+| `nanosleep()` | Sleep function (adjusted inversely) |
+| `usleep()` | Microsecond sleep |
+| `sleep()` | Second sleep |
+
+**Time modification formula:**
+```
+modified_time = initial_time + (elapsed_time * speed_multiplier)
+```
+
+**Sleep modification:**
+```
+modified_sleep = original_sleep / speed_multiplier
+```
+
+This makes the game "think" time passes faster/slower while maintaining smooth execution.
+
+## Future Features
+
+- [ ] Real-time process attachment with ptrace
+- [ ] Memory scanning (like Cheat Engine)
+- [ ] Hotkey support for speed toggle
+- [ ] Save/load speed profiles per game
+- [ ] 32-bit process support
 
 ## License
 
-MIT License
+MIT License - Free for personal use

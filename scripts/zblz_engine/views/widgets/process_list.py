@@ -12,9 +12,9 @@ from typing import List, Optional
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QListWidget, QListWidgetItem, QPushButton,
-    QGroupBox, QLineEdit
+    QGroupBox, QLineEdit, QCheckBox
 )
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal, Qt
 
 from models.app_state import ProcessInfo
 
@@ -30,7 +30,7 @@ class ProcessListWidget(QWidget):
     """
     
     process_selected = pyqtSignal(object)  # ProcessInfo
-    refresh_requested = pyqtSignal()
+    refresh_requested = pyqtSignal(bool)   # games_only parameter
     attach_requested = pyqtSignal()
     
     def __init__(self, parent=None):
@@ -47,18 +47,29 @@ class ProcessListWidget(QWidget):
         group = QGroupBox("Process List")
         group_layout = QVBoxLayout(group)
         
+        # Filter row with games only checkbox
+        filter_row = QHBoxLayout()
+        
+        self._games_only_checkbox = QCheckBox("Games only (Wine/Proton/Steam)")
+        self._games_only_checkbox.setChecked(True)
+        filter_row.addWidget(self._games_only_checkbox)
+        
+        filter_row.addStretch()
+        
+        self._refresh_btn = QPushButton("Refresh")
+        self._refresh_btn.setMinimumWidth(100)
+        self._refresh_btn.clicked.connect(self._on_refresh_clicked)
+        filter_row.addWidget(self._refresh_btn)
+        
+        group_layout.addLayout(filter_row)
+        
         # Search/filter row
         filter_layout = QHBoxLayout()
         
         self._filter_input = QLineEdit()
-        self._filter_input.setPlaceholderText("Filter processes...")
+        self._filter_input.setPlaceholderText("Filter by name or PID...")
         self._filter_input.textChanged.connect(self._apply_filter)
         filter_layout.addWidget(self._filter_input)
-        
-        self._refresh_btn = QPushButton("Refresh")
-        self._refresh_btn.setMaximumWidth(100)
-        self._refresh_btn.clicked.connect(self.refresh_requested.emit)
-        filter_layout.addWidget(self._refresh_btn)
         
         group_layout.addLayout(filter_layout)
         
@@ -91,6 +102,11 @@ class ProcessListWidget(QWidget):
         group_layout.addLayout(button_layout)
         
         layout.addWidget(group)
+    
+    def _on_refresh_clicked(self):
+        """Handle refresh button click."""
+        games_only = self._games_only_checkbox.isChecked()
+        self.refresh_requested.emit(games_only)
     
     def _on_selection_changed(self):
         """Handle list selection changes."""
@@ -136,9 +152,20 @@ class ProcessListWidget(QWidget):
                 tags.append("PROTON")
             
             tag_str = f" [{', '.join(tags)}]" if tags else ""
-            item_text = f"[{process.pid}] {process.name}{tag_str}"
+            
+            # Show process name and relevant part of cmdline
+            display_name = process.name
+            if process.cmdline and process.cmdline != process.name:
+                # Try to extract game name from cmdline
+                cmdline_short = process.cmdline[:80]
+                if len(process.cmdline) > 80:
+                    cmdline_short += "..."
+                item_text = f"[{process.pid}] {display_name}{tag_str}\n    {cmdline_short}"
+            else:
+                item_text = f"[{process.pid}] {display_name}{tag_str}"
             
             item = QListWidgetItem(item_text)
+            item.setData(Qt.UserRole, process)  # Store process object
             self._list_widget.addItem(item)
         
         # Update info label
