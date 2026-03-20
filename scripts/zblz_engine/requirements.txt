@@ -1,0 +1,4 @@
+# ZBLZ Engine Dependencies
+# Install with: pip install -r requirements.txt
+
+PyQt5>=5.15.0
