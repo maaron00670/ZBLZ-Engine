@@ -58,55 +58,27 @@ class SpeedController:
         """Detach from current process."""
         self._attached_pid = None
     
-    def set_speed(self, speed: float, pid: Optional[int] = None) -> bool:
-        """
-        Set speed for attached or specified process.
-        
-        Args:
-            speed: Speed multiplier (0.1 to 10.0)
-            pid: Optional PID, uses attached PID if not specified
-            
-        Returns:
-            True if speed was written successfully
-        """
-        target_pid = pid or self._attached_pid
-        if target_pid is None:
+    # services/speed_controller.py
+# services/speed_controller.py
+
+    def set_speed(self, speed: float) -> bool:
+        if not self._attached_pid:
             return False
-        
-        # Clamp speed to valid range
-        speed = max(0.01, min(100.0, speed))
-        
-        config_path = self._get_config_path(target_pid)
-        
+            
+        config_path = self._get_config_path(self._attached_pid)
         try:
-            with open(config_path, 'w') as f:
-                f.write(f"{speed:.4f}\n")
+            # Aseguramos que el directorio ~/.config/zblz existe
+            self._config_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Escribimos con 'with' para cerrar el archivo rápido
+            with open(config_path, "w") as f:
+                f.write(f"{speed:.2f}")
+                f.flush()
+                os.fsync(f.fileno()) # <--- CRÍTICO: Fuerza al kernel a escribir en disco
             return True
         except Exception as e:
-            print(f"[ZBLZ] Error writing speed config: {e}")
+            print(f"Fallo al escribir speed conf: {e}")
             return False
-    
-    def get_speed(self, pid: Optional[int] = None) -> Optional[float]:
-        """
-        Get current speed for attached or specified process.
-        
-        Args:
-            pid: Optional PID, uses attached PID if not specified
-            
-        Returns:
-            Current speed or None if not found
-        """
-        target_pid = pid or self._attached_pid
-        if target_pid is None:
-            return None
-        
-        config_path = self._get_config_path(target_pid)
-        
-        try:
-            with open(config_path, 'r') as f:
-                return float(f.read().strip())
-        except Exception:
-            return None
     
     def is_process_hooked(self, pid: int) -> bool:
         """

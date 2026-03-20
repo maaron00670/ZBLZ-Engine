@@ -76,7 +76,7 @@ class MainController:
                 
         except Exception as e:
             if self._view:
-                self._view.show_error(f"Fallo en el motor de escaneo: {str(e)}")
+                self._view.show_error(f"Fallo en el motor de escaneo: {str(e)}")    
     
     def _set_default_library_path(self) -> None:
         """Set the default speedhack library path."""
@@ -124,9 +124,27 @@ class MainController:
     
     # ==================== Speed Control ====================
     
-    def set_speed(self, value: float) -> None:
-        """Update the speed multiplier."""
-        self._model.speed_multiplier = value
+  # controllers/main_controller.py
+
+    def set_speed(self, speed: float) -> None:
+        """Actualiza la velocidad en el modelo y en el proceso activo."""
+        # 1. Actualizamos el valor en el estado de la app
+        self._model.speed_multiplier = speed
+        
+        # 2. Si hay un proceso seleccionado y estamos en modo REALTIME (Attached)
+        if self._model.is_attached:
+            pid = self._model.attached_pid
+            print(f"[ZBLZ] Enviando velocidad {speed}x al PID {pid}...")
+            
+            # Forzamos la escritura del archivo .conf
+            success = self._speed_controller.set_speed(speed)
+            
+            if success:
+                if self._view:
+                    self._view.show_status(f"Velocidad aplicada: {speed}x")
+            else:
+                if self._view:
+                    self._view.show_error("Error al escribir configuración de velocidad")
     
     def get_speed(self) -> float:
         """Get the current speed multiplier."""
