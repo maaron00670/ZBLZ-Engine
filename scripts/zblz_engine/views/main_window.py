@@ -212,6 +212,9 @@ class MainWindow(QMainWindow):
         self._process_list.attach_requested.connect(
             self._controller.attach_to_selected
         )
+        self._process_list.detach_requested.connect(
+            self._controller.detach_from_process
+        )
         
         # Command output
         self._command_output.generate_requested.connect(
@@ -251,3 +254,7 @@ class MainWindow(QMainWindow):
     def show_error(self, message: str):
         """Show an error message."""
         self._status_bar.showMessage(f"Error: {message}", 10000)
+    
+    def set_attached_state(self, is_attached: bool, pid: int = None):
+        """Update UI to reflect process attachment state."""
+        self._process_list.set_attached(is_attached, pid)

@@ -30,9 +30,11 @@ class ProcessInfo:
     cmdline: str = ""
     is_wine_process: bool = False
     is_proton_process: bool = False
+    is_hooked: bool = False  # True if speedhack library is loaded
     
     def __str__(self) -> str:
-        return f"[{self.pid}] {self.name}"
+        hooked = " [HOOKED]" if self.is_hooked else ""
+        return f"[{self.pid}] {self.name}{hooked}"
 
 
 @dataclass

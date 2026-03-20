@@ -26,12 +26,12 @@ fi
 
 # Compile 64-bit version
 echo "[1/2] Compiling 64-bit library..."
-gcc -shared -fPIC -O2 -o "${OUTPUT_DIR}/libspeedhack.so" "${SCRIPT_DIR}/speedhack.c" -ldl
+gcc -shared -fPIC -O2 -o "${OUTPUT_DIR}/libspeedhack.so" "${SCRIPT_DIR}/speedhack.c" -ldl -lpthread
 echo "      Created: libspeedhack.so"
 
 # Try to compile 32-bit version (optional)
 echo "[2/2] Compiling 32-bit library..."
-if gcc -m32 -shared -fPIC -O2 -o "${OUTPUT_DIR}/libspeedhack32.so" "${SCRIPT_DIR}/speedhack.c" -ldl 2>/dev/null; then
+if gcc -m32 -shared -fPIC -O2 -o "${OUTPUT_DIR}/libspeedhack32.so" "${SCRIPT_DIR}/speedhack.c" -ldl -lpthread 2>/dev/null; then
     echo "      Created: libspeedhack32.so"
 else
     echo "      Skipped: 32-bit compilation failed (install gcc-multilib for 32-bit support)"
@@ -54,7 +54,9 @@ if [ "$1" = "install" ]; then
     echo "Installed!"
     echo ""
     echo "Add this to your Steam launch options:"
-    echo "  LD_PRELOAD=\"${INSTALL_DIR}/libspeedhack.so\" SPEED=2.0 %command%"
+    echo "  LD_PRELOAD=\"${INSTALL_DIR}/libspeedhack.so\" SPEED=1.0 ZBLZ_PID=\$\$ %command%"
+    echo ""
+    echo "Then use the ZBLZ Engine GUI to control speed in real-time!"
 else
     echo "To install system-wide, run:"
     echo "  ./build.sh install"

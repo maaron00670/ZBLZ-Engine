@@ -15,6 +15,7 @@ from PyQt5.QtWidgets import (
     QGroupBox, QLineEdit, QCheckBox
 )
 from PyQt5.QtCore import pyqtSignal, Qt
+from PyQt5.QtGui import QColor, QBrush
 
 from models.app_state import ProcessInfo
 
@@ -32,6 +33,7 @@ class ProcessListWidget(QWidget):
     process_selected = pyqtSignal(object)  # ProcessInfo
     refresh_requested = pyqtSignal(bool)   # games_only parameter
     attach_requested = pyqtSignal()
+    detach_requested = pyqtSignal()
     
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -96,6 +98,7 @@ class ProcessListWidget(QWidget):
         
         self._detach_btn = QPushButton("Detach")
         self._detach_btn.setEnabled(False)
+        self._detach_btn.clicked.connect(self.detach_requested.emit)
         button_layout.addWidget(self._detach_btn)
         
         button_layout.addStretch()
@@ -146,6 +149,8 @@ class ProcessListWidget(QWidget):
         for process in visible:
             # Create descriptive item text
             tags = []
+            if process.is_hooked:
+                tags.append("SPEEDHACK ACTIVE")
             if process.is_wine_process:
                 tags.append("WINE")
             if process.is_proton_process:
@@ -166,6 +171,11 @@ class ProcessListWidget(QWidget):
             
             item = QListWidgetItem(item_text)
             item.setData(Qt.UserRole, process)  # Store process object
+            
+            # Highlight processes with speedhack active
+            if process.is_hooked:
+                item.setForeground(QBrush(QColor("#4ade80")))  # Green color
+            
             self._list_widget.addItem(item)
         
         # Update info label
@@ -196,3 +206,15 @@ class ProcessListWidget(QWidget):
         self._list_widget.clear()
         self._attach_btn.setEnabled(False)
         self._info_label.setText("No processes loaded")
+    
+    def set_attached(self, is_attached: bool, pid: int = None):
+        """Update UI to reflect attachment state."""
+        self._attach_btn.setEnabled(not is_attached and self._selected is not None)
+        self._detach_btn.setEnabled(is_attached)
+        
+        if is_attached and pid:
+            self._info_label.setText(f"Attached to PID {pid} - Speed changes apply in real-time!")
+            self._info_label.setStyleSheet("color: #4ade80;")  # Green
+        else:
+            self._info_label.setStyleSheet("")
+            self._update_list_display()
