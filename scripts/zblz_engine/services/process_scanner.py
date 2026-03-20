@@ -44,31 +44,46 @@ class ProcessScanner:
     def __init__(self):
         self._cache: List[ProcessInfo] = []
     
-    # Modifica estas partes en services/process_scanner.py
-
     def scan_all(self, include_system: bool = False) -> List[ProcessInfo]:
         """
-        Escanea TODO en /proc. En Linux, si no eres root, 
-        solo verás detalles completos de tus propios procesos.
+        Scan all running processes.
+        
+        Args:
+            include_system: Include system processes (usually not needed)
+        
+        Returns:
+            List of ProcessInfo objects
         """
         processes = []
+        proc_dir = "/proc"
+        
         try:
-            # Listamos /proc
-            for pid_dir in os.listdir('/proc'):
-                if not pid_dir.isdigit(): continue
+            for entry in os.listdir(proc_dir):
+                if not entry.isdigit():
+                    continue
                 
-                pid = int(pid_dir)
-                p_info = self._get_process_info(pid)
+                pid = int(entry)
+                process_info = self._get_process_info(pid)
                 
-                if p_info:
-                    # Si no queremos procesos del sistema (kernel threads), los saltamos
-                    if not include_system and self._is_system_process(p_info):
-                        continue
-                    processes.append(p_info)
-        except Exception as e:
-            print(f"Error en scan_all: {e}")
-            
-        return sorted(processes, key=lambda p: p.name.lower())
+                if process_info is None:
+                    continue
+                
+                # Filter system processes unless requested
+                if not include_system and self._is_system_process(process_info):
+                    continue
+                
+                processes.append(process_info)
+        
+        except PermissionError:
+            pass
+        except FileNotFoundError:
+            pass
+        
+        # Sort by name, then by PID
+        processes.sort(key=lambda p: (p.name.lower(), p.pid))
+        
+        self._cache = processes
+        return processes
     
     def scan_games_only(self) -> List[ProcessInfo]:
         """
@@ -171,33 +186,13 @@ class ProcessScanner:
         
         return False
     
-   # process_scanner.py (Fragmento a actualizar)
-
     def _is_game_process(self, process: ProcessInfo) -> bool:
-        """
-        Check if process appears to be a game.
-        Refactorizado para evitar falsos positivos con editores de código.
-        """
+        """Check if process appears to be a game."""
         cmdline_lower = process.cmdline.lower()
-        name_lower = process.name.lower()
         
-        # 1. Comprobaciones de Steam seguras
-        steam_indicators = ["steam_app", "steamapps/common", "compatdata"]
-        for indicator in steam_indicators:
+        for indicator in self.GAME_INDICATORS:
             if indicator in cmdline_lower:
                 return True
-                
-        # 2. Comprobación estricta de .exe
-        # En lugar de buscar ".exe" en cualquier parte de los argumentos (lo cual
-        # atrapa a VS Code si editas un proyecto), comprobamos si el ejecutable 
-        # principal termina en .exe o si es lanzado por wine.
-        if name_lower.endswith(".exe"):
-            return True
-            
-        # Si el primer argumento (el comando en sí) termina en .exe
-        cmd_parts = cmdline_lower.split()
-        if cmd_parts and cmd_parts[0].endswith(".exe"):
-            return True
         
         return False
     

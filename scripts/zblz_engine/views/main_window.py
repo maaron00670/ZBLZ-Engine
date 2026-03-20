@@ -242,15 +242,10 @@ class MainWindow(QMainWindow):
     def update_speed_display(self, speed: float):
         """Update the speed display (called by controller)."""
         self._speed_control.set_speed(speed)
-    # Esto debería estar en views/main_window.py
-    def update_process_list(self, processes):
-        self.list_widget.clear() # Limpiar la lista de la interfaz
-        for p in processes:
-            # p es un objeto ProcessInfo
-            display_text = f"[{p.pid}] {p.name}"
-            if p.is_hooked:
-                display_text += " (SPEEDHACK ACTIVO)"
-            self.list_widget.addItem(display_text)
+    
+    def update_process_list(self, processes: List["ProcessInfo"]):
+        """Update the process list (called by controller)."""
+        self._process_list.set_processes(processes)
     
     def show_status(self, message: str, timeout: int = 5000):
         """Show a message in the status bar."""
