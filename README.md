@@ -1,158 +1,165 @@
+Aquí tienes el contenido del archivo README.md formateado correctamente en Markdown de GitHub, listo para copiar y pegar en tu repositorio.
+Markdown
+
 # ZBLZ Engine
+Herramienta de Manipulación de Velocidad de Juegos en Linux - Similar a la función speedhack de Cheat Engine.
 
-Linux Game Speed Manipulation Tool - Similar to Cheat Engine's speedhack feature.
+## Cómo funciona
+ZBLZ Engine utiliza `LD_PRELOAD` para inyectar una librería que intercepta las llamadas al sistema relacionadas con el tiempo (`clock_gettime`, `gettimeofday`, `nanosleep`, etc.) y las modifica para acelerar o ralentizar el tiempo del juego.
 
-## How It Works
+### Dos modos de operación:
 
-ZBLZ Engine uses `LD_PRELOAD` to inject a library that intercepts time-related system calls (`clock_gettime`, `gettimeofday`, `nanosleep`, etc.) and modifies them to speed up or slow down game time.
+1. **Opciones de lanzamiento de Steam** (Actual)
+   - Genera un comando y lo pegas en las propiedades del juego en Steam.
+   - Funciona con cualquier juego, incluyendo juegos de Proton/Wine.
+   - La velocidad se fija al momento de lanzar el juego.
 
-### Two Modes of Operation:
+2. **Adjuntar a proceso** (Futuro)
+   - Adjuntarse a juegos que ya están en ejecución.
+   - Cambiar la velocidad en tiempo real.
 
-1. **Steam Launch Options** (Current)
-   - Generate a command and paste it in Steam game properties
-   - Works with any game, including Proton/Wine games
-   - Speed is fixed at launch time
+## Inicio Rápido
 
-2. **Process Attachment** (Future)
-   - Attach to already running games
-   - Change speed in real-time
-
-## Quick Start
-
-### 1. Build the Speedhack Library
-
+### 1. Compilar la librería Speedhack
 ```bash
 cd lib/
 chmod +x build.sh
 ./build.sh install
-```
 
-This compiles `libspeedhack.so` and installs it to `~/.local/lib/zblz/`.
+Esto compila libspeedhack.so e instala la librería en ~/.local/lib/zblz/.
 
-**Requirements:**
-- GCC: `sudo apt install build-essential`
-- Optional for 32-bit games: `sudo apt install gcc-multilib`
+Requisitos:
 
-### 2. Run ZBLZ Engine
+    GCC: sudo apt install build-essential
 
-```bash
+    Opcional para juegos de 32 bits: sudo apt install gcc-multilib
+
+2. Ejecutar ZBLZ Engine
+Bash
+
 cd scripts/zblz_engine
 pip install -r requirements.txt
 python main.py
-```
 
-### 3. Use with Steam Games
+3. Usar con juegos de Steam
 
-1. In ZBLZ Engine, adjust the speed slider (e.g., 2.0x for double speed)
-2. Click "Generate Command" to create the launch option
-3. In Steam: Right-click game -> Properties -> Set Launch Options
-4. Paste the generated command
-5. Launch the game - it will run at modified speed!
+    En ZBLZ Engine, ajusta el deslizador de velocidad (por ejemplo, 2.0x para doble velocidad).
 
-**Example commands:**
-```bash
-# Double speed
-LD_PRELOAD="/home/user/.local/lib/zblz/libspeedhack.so" SPEED=2.00 %command%
+    Haz clic en "Generar Comando" para crear la opción de lanzamiento.
 
-# Half speed (slow motion)
-LD_PRELOAD="/home/user/.local/lib/zblz/libspeedhack.so" SPEED=0.50 %command%
+    En Steam: Botón derecho sobre el juego → Propiedades → Opciones de lanzamiento.
 
-# With MangoHud overlay
-mangohud LD_PRELOAD="/home/user/.local/lib/zblz/libspeedhack.so" SPEED=1.50 %command%
+    Pega el comando generado.
 
-# With GameMode for better performance
-gamemoderun LD_PRELOAD="/home/user/.local/lib/zblz/libspeedhack.so" SPEED=2.00 %command%
-```
+    ¡Lanza el juego y se ejecutará a la velocidad modificada!
 
-## Process Scanner
+Ejemplos de comandos:
 
-The Process List shows running Wine/Proton/Steam games:
+    Doble velocidad:
+    LD_PRELOAD="/home/usuario/.local/lib/zblz/libspeedhack.so" SPEED=2.00 %command%
 
-1. Click "Refresh" to scan for running games
-2. Toggle "Games only" to see all processes or just games
-3. Select a process to see details
+    Media velocidad (cámara lenta):
+    LD_PRELOAD="/home/usuario/.local/lib/zblz/libspeedhack.so" SPEED=0.50 %command%
 
-**Note:** Process attachment for real-time speed control is planned for a future update.
+    Con overlay de MangoHud:
+    mangohud LD_PRELOAD="/home/usuario/.local/lib/zblz/libspeedhack.so" SPEED=1.50 %command%
 
-## Project Structure
+    Con GameMode para mejor rendimiento:
+    gamemoderun LD_PRELOAD="/home/usuario/.local/lib/zblz/libspeedhack.so" SPEED=2.00 %command%
 
-```
+Escáner de Procesos
+
+La lista de procesos muestra juegos de Wine/Proton/Steam en ejecución:
+
+    Haz clic en "Actualizar" para escanear juegos en ejecución.
+
+    Activa "Solo juegos" para ver solo procesos de juegos o todos los procesos.
+
+    Selecciona un proceso para ver sus detalles.
+
+    Nota: La función de adjuntar a procesos para controlar la velocidad en tiempo real está planeada para una actualización futura.
+
+Estructura del Proyecto
+Plaintext
+
 zblz_engine/
-├── main.py                    # Application entry point
-├── requirements.txt           # Python dependencies
+├── main.py                    # Punto de entrada de la aplicación
+├── requirements.txt           # Dependencias de Python
 ├── lib/
-│   ├── speedhack.c           # C library source code
-│   ├── build.sh              # Build script
-│   └── libspeedhack.so       # Compiled library (after build)
+│   ├── speedhack.c            # Código fuente de la librería en C
+│   ├── build.sh               # Script de compilación
+│   └── libspeedhack.so        # Librería compilada (después de compilar)
 ├── models/
-│   └── app_state.py          # Application state (MVC model)
+│   └── app_state.py           # Estado de la aplicación (modelo MVC)
 ├── views/
-│   ├── main_window.py        # Main window
-│   ├── styles.py             # Dark theme styling
+│   ├── main_window.py         # Ventana principal
+│   ├── styles.py              # Estilos del tema oscuro
 │   └── widgets/
-│       ├── speed_control.py  # Speed slider widget
-│       ├── process_list.py   # Process scanner widget
-│       └── command_output.py # Command generator widget
+│       ├── speed_control.py   # Widget del deslizador de velocidad
+│       ├── process_list.py    # Widget del escáner de procesos
+│       └── command_output.py  # Widget del generador de comandos
 ├── controllers/
-│   └── main_controller.py    # Business logic (MVC controller)
+│   └── main_controller.py     # Lógica de negocio (controlador MVC)
 └── services/
-    └── process_scanner.py    # /proc filesystem scanner
-```
+    └── process_scanner.py     # Escáner del sistema de archivos /proc
 
-## Troubleshooting
+Solución de Problemas
+Error "Library not found"
 
-### "Library not found" error
-Make sure you've built and installed the library:
-```bash
+Asegúrate de haber compilado e instalado la librería:
+Bash
+
 cd lib/
 ./build.sh install
-```
 
-### Game crashes or doesn't speed up
-- Some games use different timing methods that may not be intercepted
-- Anti-cheat systems may block LD_PRELOAD
-- Try both 32-bit and 64-bit libraries for older games
+El juego se cierra o no cambia de velocidad
 
-### Permission denied when scanning processes
-Some processes require root access to read. This is normal for system processes.
+    Algunos juegos usan métodos de temporización diferentes que pueden no ser interceptados.
 
-### Speed seems inconsistent
-- Physics-based games may have frame-rate dependent physics
-- Online games may sync with server time
-- Some games cap their internal tick rate
+    Los sistemas anti-cheat pueden bloquear LD_PRELOAD.
 
-## How the Speedhack Works
+    Prueba tanto la versión de 32 bits como la de 64 bits para juegos antiguos.
 
-The `libspeedhack.so` library uses `LD_PRELOAD` to intercept these functions:
+"Permission denied" al escanear procesos
 
-| Function | Purpose |
-|----------|---------|
-| `clock_gettime()` | Main timing function (CLOCK_MONOTONIC, CLOCK_REALTIME) |
-| `gettimeofday()` | Legacy timing function |
-| `nanosleep()` | Sleep function (adjusted inversely) |
-| `usleep()` | Microsecond sleep |
-| `sleep()` | Second sleep |
+Algunos procesos requieren permisos de root para leerlos. Esto es normal en procesos del sistema.
+La velocidad parece inconsistente
 
-**Time modification formula:**
-```
-modified_time = initial_time + (elapsed_time * speed_multiplier)
-```
+    Los juegos basados en física pueden tener física dependiente de la tasa de frames.
 
-**Sleep modification:**
-```
-modified_sleep = original_sleep / speed_multiplier
-```
+    Los juegos en línea pueden sincronizarse con el tiempo del servidor.
 
-This makes the game "think" time passes faster/slower while maintaining smooth execution.
+    Algunos juegos limitan su tasa interna de ticks.
 
-## Future Features
+Cómo funciona el Speedhack
 
-- [ ] Real-time process attachment with ptrace
-- [ ] Memory scanning (like Cheat Engine)
-- [ ] Hotkey support for speed toggle
-- [ ] Save/load speed profiles per game
-- [ ] 32-bit process support
+La librería libspeedhack.so utiliza LD_PRELOAD para interceptar las siguientes funciones:
+Función	Propósito
+clock_gettime()	Función principal de temporización (CLOCK_MONOTONIC, CLOCK_REALTIME)
+gettimeofday()	Función de temporización antigua
+nanosleep()	Función de sleep (ajustada inversamente)
+usleep()	Sleep en microsegundos
+sleep()	Sleep en segundos
 
-## License
+Fórmula de modificación del tiempo:
+tiempo_modificado=tiempo_inicial+(tiempo_transcurrido×multiplicador_velocidad)
 
-MIT License - Free for personal use
+Modificación del sleep:
+sleep_modificado=multiplicador_velocidadsleep_original​
+
+Esto hace que el juego "crea" que el tiempo pasa más rápido o más lento mientras mantiene una ejecución fluida.
+Funciones Futuras
+
+    Adjuntar a procesos en tiempo real con ptrace.
+
+    Escaneo de memoria (como Cheat Engine).
+
+    Soporte de teclas rápidas (hotkeys) para cambiar velocidad.
+
+    Guardar/cargar perfiles de velocidad por juego.
+
+    Soporte completo para procesos de 32 bits.
+
+Licencia
+
+Licencia MIT - Gratuito para uso personal.
