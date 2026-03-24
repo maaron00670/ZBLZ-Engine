@@ -151,27 +151,19 @@ class AppState:
         self._memory_scan_results.clear()
         self._notify_observers("memory_cleared")
     
-# models/app_state.py
-
-    # ... código anterior ...
-
     # ==================== Future: Process Attachment ====================
     
     @property
     def is_attached(self) -> bool:
         """Check if currently attached to a process."""
         return self._attached_pid is not None
-
-    # --- AÑADE ESTO AQUÍ ---
-    @property
-    def attached_pid(self) -> Optional[int]:
-        """Devuelve el PID al que estamos vinculados (usado por el controlador)."""
-        return self._attached_pid
-    # -----------------------
     
     def attach_to_process(self, pid: int) -> None:
         """Attach to a process. Prepared for future use."""
         self._attached_pid = pid
         self._notify_observers("process_attached")
-
-    # ... resto del archivo ...
+    
+    def detach(self) -> None:
+        """Detach from current process. Prepared for future use."""
+        self._attached_pid = None
+        self._notify_observers("process_detached")
