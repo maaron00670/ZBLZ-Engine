@@ -1,9 +1,6 @@
 # EN DESARROLLO
 # NADA PROFESIONAL NI CON FACILIDADES DE USO, HECHO CON FINES DE APRENDER
 
-
-Markdown
-
 # ZBLZ Engine
 Herramienta de Manipulación de Velocidad de Juegos en Linux - Similar a la función speedhack de Cheat Engine.
 
