@@ -1,275 +1,1586 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="ZBLZ Engine - Herramienta de manipulación de velocidad para juegos en Linux. Similar al speedhack de Cheat Engine. Usa LD_PRELOAD para acelerar o ralentizar cualquier juego.">
+    <meta name="description" content="ZBLZ Engine - Speedhack para Linux. Manipula la velocidad de cualquier juego usando LD_PRELOAD. Alternativa nativa a Cheat Engine Speedhack en Linux.">
     <title>ZBLZ Engine | Speedhack para Linux</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
-
         :root {
-            --zblz-purple: #6B21A8;
-            --zblz-pink: #C026D3;
-            --zblz-light-pink: #E879F9;
+            --purple-deep: #1A0F2E;
+            --purple-mid: #2E1065;
+            --purple-main: #6B21A8;
+            --pink-hot: #C026D3;
+            --pink-light: #E879F9;
+            --pink-pale: #F0ABFC;
+            --emerald: #10B981;
+            --amber: #F59E0B;
+            --bg: #0D0620;
+            --card: #1C0F35;
+            --border: rgba(192,38,211,0.25);
+            --glow: 0 0 40px rgba(232,121,249,0.2);
         }
 
-        .tailwind-ready * {
-            font-family: 'Inter', system_ui, sans-serif;
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg);
+            color: #D4C5F0;
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
         }
 
-        .logo-font {
-            font-family: 'Space Grotesk', sans-serif;
+        /* ─── BACKGROUND GRID ─── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(192,38,211,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(192,38,211,0.04) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 0;
         }
 
-        .hero-bg {
-            background: linear-gradient(135deg, #2E1065 0%, #4C1D95 50%, #581C87 100%);
+        /* ─── UTILITY ─── */
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .font-title { font-family: 'Rajdhani', sans-serif; }
+
+        /* ─── SCROLLBAR ─── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--purple-main); border-radius: 3px; }
+
+        /* ─── NAVBAR ─── */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(13,6,32,0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
         }
 
-        .accent-glow {
-            box-shadow: 0 0 25px -5px rgb(192 38 211 / 0.4);
+        .nav-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        .section-header {
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .logo-text {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 2px;
+        }
+
+        .logo-text span { color: var(--pink-light); }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #A78BCA;
+            letter-spacing: 0.5px;
+            transition: color 0.2s;
+            text-transform: uppercase;
+        }
+
+        .nav-links a:hover { color: var(--pink-light); }
+
+        .nav-actions { display: flex; gap: 10px; align-items: center; }
+
+        .btn-ghost {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 18px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.04);
+            color: #C4B3E0;
+            font-size: 0.82rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--pink-light);
+            color: var(--pink-light);
+            background: rgba(232,121,249,0.08);
+        }
+
+        .btn-primary {
+            display: flex; align-items: center; gap: 8px;
+            padding: 9px 22px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--pink-hot), var(--pink-light));
+            color: #1A0030;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-decoration: none;
+            letter-spacing: 0.3px;
+            transition: all 0.25s;
+            box-shadow: 0 4px 20px rgba(192,38,211,0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(192,38,211,0.6);
+        }
+
+        /* ─── HERO ─── */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            padding: 6rem 2rem 4rem;
+        }
+
+        /* Radial glow behind hero */
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: -200px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 900px;
+            height: 700px;
+            background: radial-gradient(ellipse, rgba(109,33,168,0.35) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5rem;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(109,33,168,0.2);
+            border: 1px solid rgba(232,121,249,0.3);
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--pink-light);
+            margin-bottom: 1.5rem;
+            letter-spacing: 1px;
+        }
+
+        .badge-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--pink-light);
+            animation: pulseDot 1.5s infinite;
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.7); }
+        }
+
+        .hero-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: clamp(4rem, 8vw, 7.5rem);
+            font-weight: 700;
+            line-height: 0.92;
+            color: #fff;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-title .accent {
+            background: linear-gradient(135deg, var(--pink-hot), var(--pink-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-desc {
+            font-size: 1.15rem;
+            line-height: 1.7;
+            color: #B09FD0;
+            max-width: 480px;
+            margin-bottom: 2.5rem;
+        }
+
+        .hero-desc strong { color: var(--pink-pale); font-weight: 600; }
+
+        .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 3rem; }
+
+        .btn-lg {
+            padding: 13px 30px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border-radius: 10px;
+        }
+
+        .hero-checks {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .hero-check {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.88rem;
+            color: #9C88C0;
+        }
+
+        .hero-check i { color: var(--pink-light); font-size: 0.75rem; }
+
+        /* ─── HERO UI CARD ─── */
+        .hero-card {
+            background: rgba(28,15,53,0.9);
+            border: 1px solid rgba(232,121,249,0.2);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 60px rgba(192,38,211,0.1);
             position: relative;
         }
 
-        .section-header::after {
+        .hero-card::before {
             content: '';
             position: absolute;
-            bottom: -6px;
-            left: 0;
-            width: 72px;
-            height: 4px;
-            background: linear-gradient(to right, #C026D3, #E879F9);
-            border-radius: 9999px;
+            inset: -1px;
+            border-radius: 21px;
+            background: linear-gradient(135deg, rgba(232,121,249,0.15), transparent 60%);
+            pointer-events: none;
         }
 
-        .card-hover {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(192,38,211,0.15);
         }
 
-        .card-hover:hover {
+        .card-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            color: #7C6A9A;
+            letter-spacing: 1px;
+        }
+
+        .status-live {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--emerald);
+        }
+
+        .status-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: var(--emerald);
+            box-shadow: 0 0 8px var(--emerald);
+            animation: pulseDot 1.2s infinite;
+        }
+
+        .speed-display {
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+            margin-bottom: 24px;
+        }
+
+        .speed-num {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 5rem;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1;
+            transition: color 0.3s;
+        }
+
+        .speed-unit {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
+            color: var(--pink-light);
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .speed-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            color: #6B5A8A;
+            letter-spacing: 1.5px;
+            margin-bottom: 6px;
+        }
+
+        /* ─── CUSTOM SLIDER ─── */
+        .slider-wrap { margin-bottom: 8px; }
+
+        .slider-track {
+            position: relative;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(109,33,168,0.3);
+            margin-bottom: 6px;
+            overflow: hidden;
+        }
+
+        .slider-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, var(--purple-main), var(--pink-hot), var(--pink-light));
+            transition: width 0.05s;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: transparent;
+            cursor: pointer;
+            position: absolute;
+            top: 0; left: 0;
+            margin: 0;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--pink-hot), var(--pink-light));
+            box-shadow: 0 0 14px rgba(232,121,249,0.7);
+            cursor: grab;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:active {
+            cursor: grabbing;
+            transform: scale(1.2);
+            box-shadow: 0 0 22px rgba(232,121,249,0.9);
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.62rem;
+            color: #5A4A7A;
+        }
+
+        /* ─── SPEED ANIMATION CANVAS ─── */
+        .speed-canvas-wrap {
+            position: relative;
+            height: 80px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 12px;
+            margin: 16px 0;
+            overflow: hidden;
+            border: 1px solid rgba(109,33,168,0.3);
+        }
+
+        #speedCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .canvas-label {
+            position: absolute;
+            top: 50%;
+            left: 12px;
+            transform: translateY(-50%);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.58rem;
+            color: #5A4A7A;
+            letter-spacing: 1px;
+            pointer-events: none;
+        }
+
+        .cmd-box {
+            background: #060310;
+            border: 1px solid rgba(109,33,168,0.4);
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--pink-light);
+            word-break: break-all;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px; right: 8px;
+            background: rgba(192,38,211,0.15);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 0.6rem;
+            color: var(--pink-light);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .copy-btn:hover { background: rgba(192,38,211,0.3); }
+
+        .card-footer {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--pink-light);
+        }
+
+        .pulse-ring {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--pink-light);
+            box-shadow: 0 0 12px var(--pink-hot);
+            animation: pulseDot 1.5s infinite;
+        }
+
+        /* Floating tags */
+        .tag-float {
+            position: absolute;
+            background: #060310;
+            border: 1px solid;
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            pointer-events: none;
+        }
+
+        .tag-pink {
+            border-color: rgba(232,121,249,0.4);
+            color: var(--pink-light);
+            top: -16px; right: -16px;
+            transform: rotate(8deg);
+            animation: floatTag 3s ease-in-out infinite;
+        }
+
+        .tag-amber {
+            border-color: rgba(245,158,11,0.4);
+            color: var(--amber);
+            bottom: -16px; left: -16px;
+            transform: rotate(-7deg);
+            animation: floatTag 3s ease-in-out infinite 1.5s;
+        }
+
+        @keyframes floatTag {
+            0%, 100% { transform: rotate(8deg) translateY(0); }
+            50% { transform: rotate(8deg) translateY(-6px); }
+        }
+
+        .tag-amber { animation: floatTagNeg 3s ease-in-out infinite 1.5s; }
+
+        @keyframes floatTagNeg {
+            0%, 100% { transform: rotate(-7deg) translateY(0); }
+            50% { transform: rotate(-7deg) translateY(-6px); }
+        }
+
+        /* ─── SECTIONS SHARED ─── */
+        section {
+            position: relative;
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .section-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(109,33,168,0.15);
+            border: 1px solid rgba(192,38,211,0.2);
+            padding: 5px 14px;
+            border-radius: 100px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--pink-light);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: clamp(2rem, 4vw, 3.2rem);
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 1px;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+        }
+
+        .section-sub {
+            font-size: 1rem;
+            color: #8A7AA8;
+            max-width: 560px;
+            line-height: 1.7;
+        }
+
+        /* ─── DIVIDER ─── */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(192,38,211,0.3), transparent);
+            margin: 0;
+        }
+
+        /* ─── HOW IT WORKS ─── */
+        .how-section {
+            padding: 7rem 0;
+            background: rgba(0,0,0,0.25);
+        }
+
+        .how-grid {
+            display: grid;
+            grid-template-columns: repeat(3,1fr);
+            gap: 2rem;
+            margin-top: 3.5rem;
+        }
+
+        .how-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+        }
+
+        .how-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--purple-main), var(--pink-hot));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s;
+        }
+
+        .how-card:hover::before { transform: scaleX(1); }
+
+        .how-card:hover {
             transform: translateY(-8px);
-            border-color: #C026D3;
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.3), 0 0 30px -10px rgb(192 38 211 / 0.5);
+            border-color: rgba(192,38,211,0.5);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4), 0 0 30px rgba(192,38,211,0.12);
         }
 
-        .terminal {
-            animation: blink 1.4s infinite;
+        .card-num {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 4rem;
+            font-weight: 700;
+            color: rgba(192,38,211,0.12);
+            line-height: 1;
+            position: absolute;
+            top: 12px; right: 20px;
         }
 
-        @keyframes blink {
-            50% { opacity: 0.4; }
+        .card-icon {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            background: rgba(192,38,211,0.1);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 1.2rem;
+            border: 1px solid rgba(192,38,211,0.15);
+        }
+
+        .how-card h3 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.7rem;
+            letter-spacing: 0.5px;
+        }
+
+        .how-card p { font-size: 0.88rem; color: #7A6A9A; line-height: 1.6; }
+
+        .mono-formula {
+            margin-top: 1rem;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(192,38,211,0.2);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--pink-pale);
+        }
+
+        /* ─── QUICK START ─── */
+        .quickstart-section { padding: 7rem 0; }
+
+        .code-card {
+            background: #070312;
+            border: 1px solid rgba(109,33,168,0.35);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .code-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            background: rgba(109,33,168,0.1);
+            border-bottom: 1px solid rgba(109,33,168,0.2);
+        }
+
+        .code-dots { display: flex; gap: 6px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
+        .dot-red { background: #FF5F57; }
+        .dot-yellow { background: #FFBD2E; }
+        .dot-green { background: #28CA41; }
+
+        .code-lang {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            color: #5A4A7A;
+            letter-spacing: 1px;
+        }
+
+        .code-body {
+            padding: 20px 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            line-height: 1.8;
+            color: #10B981;
+            overflow-x: auto;
+        }
+
+        .code-comment { color: #5A4A7A; }
+        .code-path { color: var(--pink-pale); }
+
+        .quickstart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 3.5rem;
+        }
+
+        .step-label {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step-num-badge {
+            width: 26px; height: 26px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, var(--purple-main), var(--pink-hot));
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .steam-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin-top: 2rem;
+        }
+
+        .steam-examples {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .example-card {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(109,33,168,0.25);
+            border-radius: 10px;
+            padding: 14px;
+        }
+
+        .example-card .label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--emerald);
+            margin-bottom: 8px;
+        }
+
+        .example-card code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.62rem;
+            color: var(--pink-light);
+            word-break: break-all;
+            line-height: 1.5;
+        }
+
+        /* ─── STEAM COMPAT ─── */
+        .compat-section {
+            padding: 5rem 0;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .compat-logos {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 2.5rem;
+            flex-wrap: wrap;
+        }
+
+        .compat-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: #6A5A8A;
+            transition: color 0.3s, transform 0.3s;
+        }
+
+        .compat-logo:hover { color: var(--pink-light); transform: translateY(-4px); }
+
+        .compat-logo i { font-size: 2.5rem; }
+        .compat-logo span { font-size: 0.75rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+        .compat-logo .text-xl { font-size: 1.4rem; font-family: 'Rajdhani', sans-serif; font-weight: 700; }
+
+        /* ─── SCANNER ─── */
+        .scanner-section { padding: 7rem 0; }
+
+        .scanner-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 700px;
+            margin: 3rem auto 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scanner-box::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px; height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(192,38,211,0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .scan-icon {
+            font-size: 3rem;
+            color: var(--pink-light);
+            margin-bottom: 1.2rem;
+            display: block;
+        }
+
+        .scan-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(245,158,11,0.1);
+            border: 1px solid rgba(245,158,11,0.3);
+            border-radius: 100px;
+            padding: 4px 14px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--amber);
+            letter-spacing: 1px;
+            margin-top: 1rem;
+        }
+
+        /* ─── TECHNIQUE ─── */
+        .tech-section {
+            padding: 7rem 0;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            max-width: 900px;
+            margin: 3rem auto 0;
+        }
+
+        .tech-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+
+        .tech-card h3 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--pink-light);
+            letter-spacing: 1px;
+            margin-bottom: 1.2rem;
+            text-transform: uppercase;
+        }
+
+        .fn-list { list-style: none; }
+
+        .fn-list li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(109,33,168,0.12);
+            font-size: 0.85rem;
+            color: #8A7AA8;
+        }
+
+        .fn-list li:last-child { border-bottom: none; }
+
+        .fn-name {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--emerald);
+            font-size: 0.78rem;
+        }
+
+        .formula-block {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(109,33,168,0.2);
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+        }
+
+        .formula-block .f-label { font-size: 0.72rem; color: #5A4A7A; margin-bottom: 4px; }
+        .formula-block .f-eq {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            color: #fff;
+        }
+
+        /* ─── ROADMAP ─── */
+        .roadmap-section { padding: 7rem 0; }
+
+        .roadmap-list {
+            max-width: 700px;
+            margin: 3rem auto 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .roadmap-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.5rem 2rem;
+            border-left: 3px solid;
+            transition: transform 0.2s;
+            position: relative;
+        }
+
+        .roadmap-item:hover { transform: translateX(6px); }
+        .roadmap-item.done { border-left-color: var(--pink-hot); }
+        .roadmap-item.wip { border-left-color: var(--amber); }
+        .roadmap-item.todo { border-left-color: #6B5A8A; }
+
+        .roadmap-icon { font-size: 1.6rem; flex-shrink: 0; }
+
+        .roadmap-item h4 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.5px;
+            margin-bottom: 3px;
+        }
+
+        .roadmap-item p { font-size: 0.8rem; color: #7A6A9A; }
+
+        .roadmap-status {
+            position: absolute;
+            right: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.65rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 1px;
+            padding: 3px 10px;
+            border-radius: 100px;
+        }
+
+        .status-done { background: rgba(192,38,211,0.15); color: var(--pink-light); }
+        .status-wip { background: rgba(245,158,11,0.15); color: var(--amber); }
+        .status-todo { background: rgba(107,90,138,0.15); color: #9C88C0; }
+
+        /* ─── FOOTER ─── */
+        footer {
+            background: #060210;
+            border-top: 1px solid var(--border);
+            padding: 2.5rem 0;
+            text-align: center;
+        }
+
+        footer p { font-size: 0.82rem; color: #5A4A7A; line-height: 1.8; }
+        footer a { color: var(--pink-light); text-decoration: none; transition: color 0.2s; }
+        footer a:hover { color: var(--pink-pale); }
+
+        /* ─── ENTRANCE ANIMATIONS ─── */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .fade-up:nth-child(2) { transition-delay: 0.1s; }
+        .fade-up:nth-child(3) { transition-delay: 0.2s; }
+
+        /* ─── MOBILE ─── */
+        .mobile-menu { display: none; }
+
+        #mobileMenuPanel {
+            display: none;
+            position: absolute;
+            top: 64px; left: 0; right: 0;
+            background: rgba(13,6,32,0.97);
+            border-bottom: 1px solid var(--border);
+            padding: 1.5rem 2rem;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        #mobileMenuPanel.open { display: flex; }
+        #mobileMenuPanel a { color: #A78BCA; text-decoration: none; font-size: 0.95rem; padding: 4px 0; }
+        #mobileMenuPanel a:hover { color: var(--pink-light); }
+
+        @media (max-width: 900px) {
+            .nav-links { display: none; }
+            .mobile-menu { display: block; }
+
+            .hero-inner {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .how-grid, .quickstart-grid, .tech-grid, .steam-examples {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
+<body>
 
-<body class="tailwind-ready bg-[#1A0F2E] text-zinc-200">
-    <!-- NAVBAR -->
-    <nav class="bg-black/90 backdrop-blur-lg border-b border-purple-900/50 sticky top-0 z-50">
-        <div class="max-w-screen-2xl mx-auto px-8 py-5 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <img src="../public/LOGO MAZE 3.png" alt="ZBLZ Logo" height="40" class="h-10 drop-shadow-lg">
-                <h1 class="logo-font text-3xl tracking-tighter text-white">
-                    ZBLZ <span class="text-[#E879F9]">Engine</span>
-                </h1>
-            </div>
+<!-- ─── NAVBAR ─── -->
+<nav>
+    <div class="nav-inner">
+        <a href="#" class="logo">
+            <span class="logo-text">ZBLZ <span>ENGINE</span></span>
+        </a>
 
-            <!-- Menú -->
-            <div class="hidden md:flex items-center gap-8 text-sm font-medium">
-                <a href="#como-funciona" class="hover:text-[#E879F9] transition-colors">Cómo funciona</a>
-                <a href="#inicio-rapido" class="hover:text-[#E879F9] transition-colors">Inicio rápido</a>
-                <a href="#steam" class="hover:text-[#E879F9] transition-colors">Steam</a>
-                <a href="#escanner" class="hover:text-[#E879F9] transition-colors">Escáner de procesos</a>
-                <a href="#tecnica" class="hover:text-[#E879F9] transition-colors">Cómo funciona el speedhack</a>
-                <a href="#roadmap" class="hover:text-[#E879F9] transition-colors">Futuro</a>
-            </div>
+        <ul class="nav-links">
+            <li><a href="#como-funciona">Cómo funciona</a></li>
+            <li><a href="#inicio-rapido">Inicio rápido</a></li>
+            <li><a href="#steam">Steam</a></li>
+            <li><a href="#escanner">Escáner</a></li>
+            <li><a href="#tecnica">Técnica</a></li>
+            <li><a href="#roadmap">Roadmap</a></li>
+        </ul>
 
-            <div class="flex items-center gap-4">
-                <a href="https://github.com/maaron00670/ZBLZ-Engine" target="_blank"
-                    class="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 px-5 py-2 rounded-2xl text-sm font-medium transition-all border border-purple-800 hover:border-[#E879F9]">
-                    <i class="fab fa-github"></i>
-                    <span>GitHub</span>
-                </a>
-                <a href="#inicio-rapido"
-                    class="bg-[#E879F9] hover:bg-[#F472B6] text-black px-6 py-2 rounded-2xl text-sm font-semibold flex items-center gap-2 transition-all shadow-lg shadow-purple-500/30">
-                    <i class="fas fa-rocket"></i>
-                    Empezar ahora
-                </a>
-
-                <button onclick="toggleMobileMenu()" class="md:hidden text-2xl text-white">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
+        <div class="nav-actions">
+            <a href="https://github.com/maaron00670/ZBLZ-Engine" target="_blank" class="btn-ghost">
+                <i class="fab fa-github"></i> GitHub
+            </a>
+            <a href="#inicio-rapido" class="btn-primary">
+                <i class="fas fa-rocket"></i> Empezar
+            </a>
+            <button class="btn-ghost mobile-menu" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
         </div>
+    </div>
+    <div id="mobileMenuPanel">
+        <a href="#como-funciona">Cómo funciona</a>
+        <a href="#inicio-rapido">Inicio rápido</a>
+        <a href="#steam">Steam</a>
+        <a href="#escanner">Escáner</a>
+        <a href="#tecnica">Técnica</a>
+        <a href="#roadmap">Roadmap</a>
+    </div>
+</nav>
 
-        <!-- Mobile menu -->
-        <div id="mobileMenu" class="hidden md:hidden bg-black/95 border-t border-purple-900 px-8 py-6">
-            <div class="flex flex-col gap-4 text-sm font-medium">
-                <a href="#como-funciona" class="py-2 hover:text-[#E879F9]">Cómo funciona</a>
-                <a href="#inicio-rapido" class="py-2 hover:text-[#E879F9]">Inicio rápido</a>
-                <a href="#steam" class="py-2 hover:text-[#E879F9]">Steam</a>
-                <a href="#escanner" class="py-2 hover:text-[#E879F9]">Escáner de procesos</a>
-                <a href="#tecnica" class="py-2 hover:text-[#E879F9]">Cómo funciona el speedhack</a>
-                <a href="#roadmap" class="py-2 hover:text-[#E879F9]">Futuro</a>
-            </div>
-        </div>
-    </nav>
-
-    <!-- HERO -->
-    <header class="hero-bg pt-20 pb-24">
-        <div class="max-w-screen-2xl mx-auto px-8 grid md:grid-cols-2 gap-16 items-center">
-            <div>
-                <div class="inline-flex items-center gap-2 bg-purple-900/40 text-[#E879F9] text-xs font-mono px-4 py-2 rounded-3xl mb-6 border border-purple-500/30">
-                    <i class="fas fa-circle terminal"></i>
-                    LINUX • LD_PRELOAD • SPEEDHACK
-                </div>
-
-                <h2 class="text-7xl md:text-8xl font-bold leading-none logo-font tracking-tighter text-white mb-6">
-                    ZBLZ<br>ENGINE
-                </h2>
-
-                <p class="text-3xl text-purple-200 mb-8 max-w-lg">
-                    Manipula la velocidad de cualquier juego en Linux.<br>
-                    <span class="text-[#E879F9]">Como Cheat Engine, pero sin Windows.</span>
-                </p>
-
-                <div class="flex flex-wrap gap-4">
-                    <a href="#inicio-rapido"
-                        class="bg-[#E879F9] text-black hover:bg-[#F472B6] px-8 py-4 rounded-3xl font-semibold text-lg flex items-center gap-3 group shadow-xl shadow-purple-500/40">
-                        <span>Construir y usar en 3 minutos</span>
-                        <i class="fas fa-arrow-right group-active:translate-x-1 transition"></i>
-                    </a>
-
-                    <a href="https://github.com/maaron00670/ZBLZ-Engine" target="_blank"
-                        class="border border-purple-700 hover:border-[#E879F9] px-8 py-4 rounded-3xl font-medium flex items-center gap-3 transition-all">
-                        <i class="fab fa-github text-xl"></i>
-                        <span>Ver en GitHub</span>
-                    </a>
-                </div>
-
-                <div class="mt-12 flex items-center gap-8 text-sm">
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-check-circle text-[#E879F9]"></i>
-                        <span>Funciona con Proton / Wine</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-check-circle text-[#E879F9]"></i>
-                        <span>Steam Launch Options</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-check-circle text-[#E879F9]"></i>
-                        <span>Próximamente: adjuntar en tiempo real</span>
-                    </div>
-                </div>
-
-                <!-- Trust bar -->
-                <div class="mt-16 pt-8 border-t border-purple-800 flex items-center gap-6 text-xs uppercase tracking-widest text-purple-300">
-                    <div>Compatible con</div>
-                    <div class="flex gap-6">
-                        <span class="flex items-center gap-1"><i class="fab fa-steam text-2xl"></i> Steam</span>
-                        <span class="flex items-center gap-1"><i class="fab fa-linux text-2xl"></i> Linux</span>
-                        <span class="flex items-center gap-1">Proton</span>
-                        <span class="flex items-center gap-1">Wine</span>
-                        <span class="flex items-center gap-1">MangoHud</span>
-                        <span class="flex items-center gap-1">GameMode</span>
-                    </div>
-                </div>
+<!-- ─── HERO ─── -->
+<header class="hero">
+    <div class="hero-inner">
+        <div>
+            <div class="hero-badge">
+                <div class="badge-dot"></div>
+                LINUX &nbsp;·&nbsp; LD_PRELOAD &nbsp;·&nbsp; SPEEDHACK
             </div>
 
-            <!-- Visual mock -->
-            <div class="relative">
-                <div class="bg-[#2E1065] rounded-3xl p-6 shadow-2xl border border-[#E879F9]/30 accent-glow">
-                    <div class="bg-black/80 rounded-2xl p-6 font-mono text-[#E879F9] text-sm mb-6">
-                        <div class="flex justify-between mb-4">
-                            <span>ZBLZ Engine GUI</span>
-                            <span class="text-[#F472B6]">v1.0</span>
-                        </div>
-                        <div class="flex items-center justify-between mb-8">
-                            <div>
-                                <div class="text-xs text-purple-300">VELOCIDAD ACTUAL</div>
-                                <div class="text-7xl font-bold text-white">2.5x</div>
-                            </div>
-                            <div class="text-right">
-                                <input type="range" value="250" min="10" max="500" class="w-48 accent-[#E879F9]">
-                                <div class="text-xs text-purple-300 mt-1">0.1x — 5.0x</div>
-                            </div>
-                        </div>
-                        <div class="bg-zinc-950 rounded-xl p-4 text-xs flex items-center gap-2 border border-purple-700">
-                            <span class="text-[#E879F9]">LD_PRELOAD=</span>
-                            <span class="text-white">/home/usuario/.local/lib/zblz/libspeedhack.so</span>
-                        </div>
-                        <div class="text-[10px] text-purple-400 mt-3">SPEED=2.50 %command%</div>
-                    </div>
+            <h1 class="hero-title">
+                ZBLZ<br><span class="accent">ENGINE</span>
+            </h1>
 
-                    <div class="text-center text-xs font-medium text-[#E879F9] flex items-center justify-center gap-2">
-                        <div class="w-3 h-3 bg-[#E879F9] rounded-full animate-pulse"></div>
-                        JUEGO EN EJECUCIÓN A 2.5× VELOCIDAD
-                    </div>
-                </div>
-
-                <!-- Floating badges -->
-                <div class="absolute -top-4 -right-4 bg-black text-[#E879F9] text-xs font-bold px-4 py-2 rounded-2xl border border-[#E879F9]/40 shadow-xl rotate-12 accent-glow">
-                    FUNCIONA CON CUALQUIER JUEGO
-                </div>
-                <div class="absolute -bottom-4 -left-4 bg-black text-white text-xs font-bold px-4 py-2 rounded-2xl border border-purple-700 shadow-xl -rotate-12">
-                    NO ANTI-CHEAT • OFFLINE ONLY
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Resto de secciones (mantengo exactamente el mismo contenido, solo actualizo colores y estilos para que sigan la nueva estética limpia y púrpura) -->
-
-    <!-- CÓMO FUNCIONA -->
-    <section id="como-funciona" class="max-w-screen-2xl mx-auto px-8 py-20">
-        <div class="text-center mb-16">
-            <span class="px-4 py-2 bg-purple-900/50 text-[#E879F9] text-sm rounded-3xl border border-purple-500/30">TECNOLOGÍA</span>
-            <h2 class="text-5xl font-bold mt-4 section-header text-white">Cómo funciona ZBLZ Engine</h2>
-            <p class="text-purple-200 mt-4 max-w-2xl mx-auto">
-                Usa <span class="font-mono bg-black/70 px-2 py-px rounded border border-purple-700">LD_PRELOAD</span> para inyectar una biblioteca que intercepta todas las llamadas de tiempo del sistema.
+            <p class="hero-desc">
+                Speedhack nativo para Linux.<br>
+                <strong>Acelera o ralentiza cualquier juego</strong> como Cheat Engine, pero construido para Linux desde cero.
             </p>
+
+            <div class="hero-ctas">
+                <a href="#inicio-rapido" class="btn-primary btn-lg">
+                    Construir en minutos <i class="fas fa-arrow-right"></i>
+                </a>
+                <a href="https://github.com/maaron00670/ZBLZ-Engine" target="_blank" class="btn-ghost btn-lg">
+                    <i class="fab fa-github"></i> Ver en GitHub
+                </a>
+            </div>
+
+            <div class="hero-checks">
+                <div class="hero-check"><i class="fas fa-check-circle"></i> Funciona con Proton y Wine</div>
+                <div class="hero-check"><i class="fas fa-check-circle"></i> Opciones de lanzamiento de Steam</div>
+                <div class="hero-check"><i class="fas fa-check-circle"></i> Escáner de procesos incluido</div>
+                <div class="hero-check"><i class="fas fa-check-circle"></i> Sin anticheat (solo offline)</div>
+            </div>
         </div>
 
-        <div class="grid md:grid-cols-3 gap-8">
-            <div class="bg-[#2E1065] rounded-3xl p-8 border border-transparent card-hover">
-                <div class="w-12 h-12 bg-[#E879F9]/10 text-[#E879F9] flex items-center justify-center rounded-2xl mb-6 text-2xl">📡</div>
-                <h3 class="text-2xl font-semibold mb-3 text-white">Intercepta llamadas del sistema</h3>
-                <p class="text-purple-200">clock_gettime, gettimeofday, nanosleep, usleep, sleep y más.</p>
-                <div class="mt-8 text-xs font-mono text-[#F472B6]">C → LD_PRELOAD → libspeedhack.so</div>
+        <!-- UI Card -->
+        <div style="position:relative">
+            <div class="hero-card">
+                <div class="card-header">
+                    <span class="card-title">ZBLZ ENGINE &nbsp;·&nbsp; v1.0</span>
+                    <div class="status-live">
+                        <div class="status-dot"></div>
+                        EN EJECUCIÓN
+                    </div>
+                </div>
+
+                <div class="speed-label">VELOCIDAD ACTUAL</div>
+                <div class="speed-display">
+                    <div class="speed-num" id="heroSpeedNum">2.5</div>
+                    <div class="speed-unit">×</div>
+                </div>
+
+                <div class="slider-wrap">
+                    <div class="slider-track">
+                        <div class="slider-fill" id="heroSliderFill" style="width:47%"></div>
+                        <input type="range" id="heroSlider" min="10" max="500" value="250"
+                               oninput="updateHeroSpeed(this.value)">
+                    </div>
+                    <div class="slider-labels"><span>0.1×</span><span>1.0×</span><span>5.0×</span></div>
+                </div>
+
+                <!-- SPEED ANIMATION -->
+                <div class="speed-canvas-wrap">
+                    <canvas id="speedCanvas"></canvas>
+                    <div class="canvas-label">SIMULACIÓN DE VELOCIDAD</div>
+                </div>
+
+                <div class="cmd-box">
+                    <button class="copy-btn" onclick="copyCmd()">COPIAR</button>
+                    <span id="heroCmd">LD_PRELOAD="/home/usuario/.local/lib/zblz/libspeedhack.so" SPEED=2.50 %command%</span>
+                </div>
+
+                <div class="card-footer">
+                    <div class="pulse-ring"></div>
+                    <span id="heroFooterLabel">JUEGO CORRIENDO A 2.5× VELOCIDAD</span>
+                </div>
             </div>
 
-            <div class="bg-[#2E1065] rounded-3xl p-8 border border-transparent card-hover">
-                <div class="w-12 h-12 bg-[#E879F9]/10 text-[#E879F9] flex items-center justify-center rounded-2xl mb-6 text-2xl">⏱️</div>
-                <h3 class="text-2xl font-semibold mb-3 text-white">Modifica el tiempo percibido</h3>
-                <p class="text-purple-200">El juego cree que el tiempo pasa más rápido o más lento, pero el sistema sigue normal.</p>
-                <div class="mt-auto pt-8 text-xs font-semibold text-[#E879F9]">Fórmula: modified_time = initial + (elapsed × speed)</div>
+            <div class="tag-float tag-pink">CUALQUIER JUEGO</div>
+            <div class="tag-float tag-amber">OFFLINE ONLY</div>
+        </div>
+    </div>
+</header>
+
+<div class="divider"></div>
+
+<!-- ─── CÓMO FUNCIONA ─── -->
+<section id="como-funciona" class="how-section">
+    <div class="container">
+        <div style="text-align:center">
+            <div class="section-tag"><i class="fas fa-microchip"></i> TECNOLOGÍA LD_PRELOAD</div>
+            <h2 class="section-title">Cómo funciona ZBLZ Engine</h2>
+            <p class="section-sub" style="margin: 0 auto">Intercepta las llamadas al sistema relacionadas con el tiempo para modificar la velocidad percibida por el juego.</p>
+        </div>
+
+        <div class="how-grid">
+            <div class="how-card fade-up">
+                <div class="card-num">01</div>
+                <div class="card-icon">📡</div>
+                <h3>Intercepta llamadas de tiempo</h3>
+                <p>clock_gettime, gettimeofday, nanosleep, usleep, sleep y otras funciones del sistema.</p>
+            </div>
+            <div class="how-card fade-up">
+                <div class="card-num">02</div>
+                <div class="card-icon">⏱️</div>
+                <h3>Modifica el tiempo percibido</h3>
+                <p>El juego piensa que el tiempo pasa más rápido o más lento, mientras el sistema real sigue normal.</p>
+                <div class="mono-formula">modified_time = initial + (elapsed × speed)</div>
+            </div>
+            <div class="how-card fade-up">
+                <div class="card-num">03</div>
+                <div class="card-icon">🚀</div>
+                <h3>Dos modos de uso</h3>
+                <p>Steam Launch Options ya disponible. Adjuntar a proceso en tiempo real (ptrace) próximamente.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ─── INICIO RÁPIDO ─── -->
+<section id="inicio-rapido" class="quickstart-section">
+    <div class="container">
+        <div style="text-align:center">
+            <div class="section-tag"><i class="fas fa-terminal"></i> INSTALACIÓN</div>
+            <h2 class="section-title">Inicio Rápido</h2>
+        </div>
+
+        <div class="quickstart-grid">
+            <div>
+                <div class="step-label">
+                    <div class="step-num-badge">1</div>
+                    Compilar la librería
+                </div>
+                <div class="code-card">
+                    <div class="code-header">
+                        <div class="code-dots">
+                            <div class="dot dot-red"></div>
+                            <div class="dot dot-yellow"></div>
+                            <div class="dot dot-green"></div>
+                        </div>
+                        <span class="code-lang">BASH</span>
+                    </div>
+                    <div class="code-body">
+<span class="code-comment"># En la carpeta lib/</span><br>
+cd lib/<br>
+chmod +x build.sh<br>
+./build.sh install<br>
+<br>
+<span class="code-comment"># Requiere: build-essential</span><br>
+<span class="code-comment"># Opcional: gcc-multilib (32 bits)</span>
+                    </div>
+                </div>
             </div>
 
-            <div class="bg-[#2E1065] rounded-3xl p-8 border border-transparent card-hover">
-                <div class="w-12 h-12 bg-[#E879F9]/10 text-[#E879F9] flex items-center justify-center rounded-2xl mb-6 text-2xl">🚀</div>
-                <h3 class="text-2xl font-semibold mb-3 text-white">Dos modos de uso</h3>
-                <ul class="space-y-4 text-purple-200">
-                    <li class="flex items-start gap-3"><span class="font-mono bg-purple-900/70 px-2 rounded">1</span> Steam Launch Options (actual)</li>
-                    <li class="flex items-start gap-3"><span class="font-mono bg-purple-900/70 px-2 rounded">2</span> Adjuntar a proceso en tiempo real (próximamente)</li>
+            <div>
+                <div class="step-label">
+                    <div class="step-num-badge">2</div>
+                    Ejecutar ZBLZ Engine
+                </div>
+                <div class="code-card">
+                    <div class="code-header">
+                        <div class="code-dots">
+                            <div class="dot dot-red"></div>
+                            <div class="dot dot-yellow"></div>
+                            <div class="dot dot-green"></div>
+                        </div>
+                        <span class="code-lang">BASH</span>
+                    </div>
+                    <div class="code-body">
+cd scripts/zblz_engine<br>
+pip install -r requirements.txt<br>
+python main.py
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="steam-box">
+            <div class="step-label">
+                <div class="step-num-badge">3</div>
+                Usar con Steam
+            </div>
+            <p style="font-size:0.88rem; color:#7A6A9A; margin-bottom:0.5rem">
+                Ajusta la velocidad en la interfaz → Genera el comando → Pégalo en las Opciones de Lanzamiento del juego.
+            </p>
+            <div class="steam-examples">
+                <div class="example-card">
+                    <div class="label">⚡ Doble velocidad</div>
+                    <code>LD_PRELOAD="/home/usuario/.local/lib/zblz/libspeedhack.so${LD_PRELOAD:+:$LD_PRELOAD}" SPEED=2.00 %command%</code>
+                </div>
+                <div class="example-card">
+                    <div class="label">🐢 Cámara lenta</div>
+                    <code>LD_PRELOAD="/home/usuario/.local/lib/zblz/libspeedhack.so${LD_PRELOAD:+:$LD_PRELOAD}" SPEED=0.50 %command%</code>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ─── STEAM COMPAT ─── -->
+<section id="steam" class="compat-section">
+    <div class="container" style="text-align:center">
+        <div class="section-tag"><i class="fab fa-steam"></i> COMPATIBILIDAD</div>
+        <h2 class="section-title">Compatible con Steam</h2>
+        <p class="section-sub" style="margin: 0 auto">Funciona perfectamente con juegos nativos de Linux y juegos de Windows ejecutados mediante Proton o Wine.</p>
+
+        <div class="compat-logos">
+            <div class="compat-logo">
+                <i class="fab fa-steam" style="font-size:2.8rem"></i>
+                <span>Steam</span>
+            </div>
+            <div class="compat-logo">
+                <i class="fab fa-linux" style="font-size:2.8rem"></i>
+                <span>Linux</span>
+            </div>
+            <div class="compat-logo">
+                <span class="text-xl">Proton</span>
+                <span>Valve / Wine</span>
+            </div>
+            <div class="compat-logo">
+                <i class="fab fa-windows" style="font-size:2.8rem"></i>
+                <span>Wine</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ─── ESCÁNER ─── -->
+<section id="escanner" class="scanner-section">
+    <div class="container" style="text-align:center">
+        <div class="section-tag"><i class="fas fa-search"></i> PROCESO</div>
+        <h2 class="section-title">Escáner de Procesos</h2>
+        <p class="section-sub" style="margin:0 auto">Detecta automáticamente juegos de Steam, Proton y Wine en ejecución.</p>
+
+        <div class="scanner-box">
+            <i class="fas fa-radar scan-icon"></i>
+            <h3 style="font-family:'Rajdhani',sans-serif;font-size:1.4rem;color:#fff;margin-bottom:0.5rem">Lista de procesos en ejecución</h3>
+            <p style="font-size:0.88rem;color:#7A6A9A">Próximamente podrás adjuntarte directamente a cualquier proceso para cambiar la velocidad en tiempo real.</p>
+            <div class="scan-badge">
+                <i class="fas fa-circle" style="font-size:0.5rem"></i>
+                PRÓXIMAMENTE
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ─── TÉCNICA ─── -->
+<section id="tecnica" class="tech-section">
+    <div class="container" style="text-align:center">
+        <div class="section-tag"><i class="fas fa-code"></i> BAJO NIVEL</div>
+        <h2 class="section-title">Cómo funciona el Speedhack</h2>
+
+        <div class="tech-grid">
+            <div class="tech-card">
+                <h3>Funciones interceptadas</h3>
+                <ul class="fn-list">
+                    <li><span class="fn-name">clock_gettime()</span> — Principal</li>
+                    <li><span class="fn-name">gettimeofday()</span></li>
+                    <li><span class="fn-name">nanosleep()</span></li>
+                    <li><span class="fn-name">usleep()</span></li>
+                    <li><span class="fn-name">sleep()</span></li>
                 </ul>
             </div>
+            <div class="tech-card">
+                <h3>Fórmulas clave</h3>
+                <div class="formula-block">
+                    <div class="f-label">Tiempo modificado:</div>
+                    <div class="f-eq">tiempo = inicial + (transcurrido × velocidad)</div>
+                </div>
+                <div class="formula-block">
+                    <div class="f-label">Sleep modificado:</div>
+                    <div class="f-eq">sleep_mod = sleep_original / velocidad</div>
+                </div>
+            </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Las demás secciones siguen el mismo patrón: colores actualizados a la paleta púrpura/magenta del logo, más limpieza, glows sutiles y mejor contraste. -->
+<div class="divider"></div>
 
-    <!-- (Por brevedad aquí no copio todas las secciones restantes, pero en el código completo que te entrego abajo están todas actualizadas de la misma forma) -->
+<!-- ─── ROADMAP ─── -->
+<section id="roadmap" class="roadmap-section">
+    <div class="container" style="text-align:center">
+        <div class="section-tag"><i class="fas fa-map"></i> FUTURO</div>
+        <h2 class="section-title">Roadmap</h2>
 
-    <script>
-        function toggleMobileMenu() {
-            const menu = document.getElementById('mobileMenu');
-            menu.classList.toggle('hidden');
+        <div class="roadmap-list">
+            <div class="roadmap-item done fade-up">
+                <div class="roadmap-icon">✅</div>
+                <div>
+                    <h4>Opciones de lanzamiento Steam</h4>
+                    <p>Genera el comando LD_PRELOAD listo para pegar en Steam.</p>
+                </div>
+                <span class="roadmap-status status-done">DISPONIBLE</span>
+            </div>
+            <div class="roadmap-item wip fade-up">
+                <div class="roadmap-icon">🔄</div>
+                <div>
+                    <h4>Adjuntar a proceso en tiempo real (ptrace)</h4>
+                    <p>Cambia la velocidad mientras el juego está corriendo, sin reiniciar.</p>
+                </div>
+                <span class="roadmap-status status-wip">EN DESARROLLO</span>
+            </div>
+            <div class="roadmap-item todo fade-up">
+                <div class="roadmap-icon">📋</div>
+                <div>
+                    <h4>Hotkeys · Perfiles por juego · Escaneo de memoria</h4>
+                    <p>Atajos de teclado globales, configuraciones guardadas por juego y explorador de memoria.</p>
+                </div>
+                <span class="roadmap-status status-todo">PRÓXIMAMENTE</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer>
+    <div class="container">
+        <p style="font-size:1rem;font-family:'Rajdhani',sans-serif;font-weight:700;color:#6B5A8A;letter-spacing:2px;margin-bottom:8px">ZBLZ ENGINE</p>
+        <p>Proyecto en desarrollo &nbsp;·&nbsp; Hecho con fines educativos &nbsp;·&nbsp; Licencia MIT</p>
+        <p><a href="https://github.com/maaron00670/ZBLZ-Engine" target="_blank">GitHub</a></p>
+    </div>
+</footer>
+
+<script>
+// ─── MOBILE MENU ───
+function toggleMenu() {
+    document.getElementById('mobileMenuPanel').classList.toggle('open');
+}
+
+// ─── SPEED CANVAS ANIMATION ───
+const canvas = document.getElementById('speedCanvas');
+const ctx = canvas.getContext('2d');
+let animSpeed = 2.5;
+let particles = [];
+let animFrame;
+
+function resizeCanvas() {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+}
+
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+// Create particles representing game objects
+const PARTICLE_COUNT = 28;
+const COLORS = ['#E879F9','#C026D3','#6B21A8','#F0ABFC','#A855F7'];
+
+function createParticle(x) {
+    const y = 10 + Math.random() * (canvas.height - 20);
+    return {
+        x: x !== undefined ? x : Math.random() * canvas.width,
+        y,
+        baseY: y,
+        size: 2 + Math.random() * 4,
+        color: COLORS[Math.floor(Math.random() * COLORS.length)],
+        speed: 0.8 + Math.random() * 1.4,
+        wave: Math.random() * Math.PI * 2,
+        waveAmp: 4 + Math.random() * 8,
+        waveFreq: 0.02 + Math.random() * 0.04,
+        trail: [],
+        type: Math.random() > 0.5 ? 'circle' : 'diamond',
+    };
+}
+
+for (let i = 0; i < PARTICLE_COUNT; i++) {
+    particles.push(createParticle());
+}
+
+function drawDiamond(ctx, x, y, r) {
+    ctx.beginPath();
+    ctx.moveTo(x, y - r);
+    ctx.lineTo(x + r, y);
+    ctx.lineTo(x, y + r);
+    ctx.lineTo(x - r, y);
+    ctx.closePath();
+}
+
+let lastTime = 0;
+
+function animLoop(now) {
+    const dt = Math.min((now - lastTime) / 16, 4);
+    lastTime = now;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw scanlines effect
+    ctx.fillStyle = 'rgba(0,0,0,0.03)';
+    for (let y = 0; y < canvas.height; y += 4) {
+        ctx.fillRect(0, y, canvas.width, 1);
+    }
+
+    const speedFactor = animSpeed;
+
+    particles.forEach((p, i) => {
+        // Move
+        p.x += p.speed * speedFactor * dt;
+        p.wave += p.waveFreq * speedFactor * dt;
+        p.y = p.baseY + Math.sin(p.wave) * p.waveAmp;
+
+        // Trail
+        p.trail.push({ x: p.x, y: p.y });
+        const maxTrail = Math.min(3 + Math.floor(speedFactor * 4), 20);
+        if (p.trail.length > maxTrail) p.trail.shift();
+
+        // Reset
+        if (p.x > canvas.width + 20) {
+            p.x = -20;
+            p.baseY = 10 + Math.random() * (canvas.height - 20);
+            p.trail = [];
         }
-    </script>
+
+        // Draw trail
+        if (p.trail.length > 1) {
+            ctx.beginPath();
+            ctx.moveTo(p.trail[0].x, p.trail[0].y);
+            for (let t = 1; t < p.trail.length; t++) {
+                ctx.lineTo(p.trail[t].x, p.trail[t].y);
+            }
+            ctx.strokeStyle = p.color;
+            ctx.globalAlpha = 0.15 * (speedFactor / 5);
+            ctx.lineWidth = p.size * 0.6;
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+        }
+
+        // Draw particle
+        ctx.globalAlpha = 0.85;
+        if (p.type === 'diamond') {
+            drawDiamond(ctx, p.x, p.y, p.size);
+        } else {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        }
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 6 + speedFactor * 2;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1;
+    });
+
+    // Speed indicator at right
+    const labelX = canvas.width - 70;
+    ctx.font = 'bold 11px JetBrains Mono, monospace';
+    ctx.fillStyle = speedFactor > 2 ? '#E879F9' : speedFactor < 0.8 ? '#A855F7' : '#C026D3';
+    ctx.globalAlpha = 0.7;
+    ctx.textAlign = 'right';
+    ctx.fillText(`${speedFactor.toFixed(1)}×`, canvas.width - 10, canvas.height - 8);
+    ctx.textAlign = 'left';
+    ctx.globalAlpha = 1;
+
+    animFrame = requestAnimationFrame(animLoop);
+}
+
+requestAnimationFrame(animLoop);
+
+// ─── HERO SLIDER ───
+function updateHeroSpeed(val) {
+    const speed = (val / 100).toFixed(2);
+    const pct = ((val - 10) / 490) * 100;
+    document.getElementById('heroSpeedNum').textContent = parseFloat(speed).toFixed(1);
+    document.getElementById('heroSliderFill').style.width = pct + '%';
+    document.getElementById('heroCmd').textContent =
+        `LD_PRELOAD="/home/usuario/.local/lib/zblz/libspeedhack.so" SPEED=${speed} %command%`;
+    document.getElementById('heroFooterLabel').textContent =
+        `JUEGO CORRIENDO A ${parseFloat(speed).toFixed(1)}× VELOCIDAD`;
+
+    // Update canvas speed
+    animSpeed = parseFloat(speed);
+
+    // Color the number
+    const num = document.getElementById('heroSpeedNum');
+    if (animSpeed > 2) num.style.color = '#E879F9';
+    else if (animSpeed < 0.8) num.style.color = '#A855F7';
+    else num.style.color = '#fff';
+}
+
+function copyCmd() {
+    const txt = document.getElementById('heroCmd').textContent;
+    navigator.clipboard.writeText(txt).catch(() => {});
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = '✓ OK';
+    setTimeout(() => btn.textContent = 'COPIAR', 1500);
+}
+
+// ─── SCROLL FADE-IN ───
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+        if (e.isIntersecting) e.target.classList.add('visible');
+    });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
 </body>
 </html>
