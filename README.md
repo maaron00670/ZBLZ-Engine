@@ -1,5 +1,8 @@
-# EN DESARROLLO
-# NADA PROFESIONAL NI CON FACILIDADES DE USO, HECHO CON FINES DE APRENDER
+# IMPORTANTE ⚠️⚠️
+Soy inexperto y para hacer este proyecto posible me estoy ayudando de IA,
+cualquier uso que hagas de este programa es bajo tu propio riesgo.
+
+Yo estoy realizando este programa con fines de aprender y uso personal 
 
 # ZBLZ Engine
 Herramienta de Manipulación de Velocidad de Juegos en Linux - Similar a la función speedhack de Cheat Engine.
