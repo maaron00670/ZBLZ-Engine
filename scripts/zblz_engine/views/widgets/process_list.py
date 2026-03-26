@@ -52,7 +52,7 @@ class ProcessListWidget(QWidget):
         # Filter row with games only checkbox
         filter_row = QHBoxLayout()
         
-        self._games_only_checkbox = QCheckBox("Games only (Wine/Proton/Steam)")
+        self._games_only_checkbox = QCheckBox("Games only (uncheck = all user processes)")
         self._games_only_checkbox.setChecked(True)
         filter_row.addWidget(self._games_only_checkbox)
         
