@@ -125,7 +125,8 @@ class CommandOutputWidget(QWidget):
 
         instructions = QLabel(
             "Steam: Right-click game -> Properties -> Launch Options\n"
-            "Non-Steam: write command above and click launch"
+            "Non-Steam: write command above and click launch\n"
+            "Steam compatibility: keeps existing LD_PRELOAD (overlay/online)"
         )
         instructions.setObjectName("subtitle")
         instructions.setWordWrap(True)

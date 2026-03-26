@@ -1,6 +1,6 @@
 #!/bin/bash
 # ZBLZ Engine - Build speedhack library
-# 
+#
 # Prerequisites:
 #   sudo apt install gcc build-essential
 #
@@ -54,7 +54,7 @@ if [ "$1" = "install" ]; then
     echo "Installed!"
     echo ""
     echo "Add this to your Steam launch options:"
-    echo "  LD_PRELOAD=\"${INSTALL_DIR}/libspeedhack.so\" SPEED=1.0 ZBLZ_PID=\$\$ %command%"
+    echo "  LD_PRELOAD=\"${INSTALL_DIR}/libspeedhack.so\${LD_PRELOAD:+:\$LD_PRELOAD}\" SPEED=1.0 ZBLZ_PID=\$\$ %command%"
     echo ""
     echo "Then use the ZBLZ Engine GUI to control speed in real-time!"
 else
@@ -62,5 +62,5 @@ else
     echo "  ./build.sh install"
     echo ""
     echo "Or use directly with:"
-    echo "  LD_PRELOAD=\"${OUTPUT_DIR}/libspeedhack.so\" SPEED=2.0 %command%"
+    echo "  LD_PRELOAD=\"${OUTPUT_DIR}/libspeedhack.so\${LD_PRELOAD:+:\$LD_PRELOAD}\" SPEED=2.0 %command%"
 fi

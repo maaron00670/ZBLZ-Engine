@@ -118,7 +118,7 @@ class MainController:
             return "# Error: Library path not set"
 
         # ZBLZ_PID=$$ passes a stable control PID to the library
-        command = f'LD_PRELOAD="{library_path}" SPEED={speed:.2f} ZBLZ_PID=$$ %command%'
+        command = f'LD_PRELOAD="{library_path}${{LD_PRELOAD:+:$LD_PRELOAD}}" SPEED={speed:.2f} ZBLZ_PID=$$ %command%'
 
         return command
 
@@ -141,7 +141,7 @@ class MainController:
             for key, value in custom_env.items():
                 parts.append(f'{key}="{value}"')
 
-        parts.append(f'LD_PRELOAD="{self._model.library_path}"')
+        parts.append(f'LD_PRELOAD="{self._model.library_path}${{LD_PRELOAD:+:$LD_PRELOAD}}"')
         parts.append(f'SPEED={self._model.speed_multiplier:.2f}')
         parts.append('ZBLZ_PID=$$')
         parts.append("%command%")

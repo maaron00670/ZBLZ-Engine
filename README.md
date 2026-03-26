@@ -56,16 +56,16 @@ python main.py
 Ejemplos de comandos:
 
     Doble velocidad:
-    LD_PRELOAD="/home/usuario/.local/lib/zblz/libspeedhack.so" SPEED=2.00 %command%
+    LD_PRELOAD="/home/usuario/.local/lib/zblz/libspeedhack.so${LD_PRELOAD:+:$LD_PRELOAD}" SPEED=2.00 %command%
 
     Media velocidad (cámara lenta):
-    LD_PRELOAD="/home/usuario/.local/lib/zblz/libspeedhack.so" SPEED=0.50 %command%
+    LD_PRELOAD="/home/usuario/.local/lib/zblz/libspeedhack.so${LD_PRELOAD:+:$LD_PRELOAD}" SPEED=0.50 %command%
 
     Con overlay de MangoHud:
-    mangohud LD_PRELOAD="/home/usuario/.local/lib/zblz/libspeedhack.so" SPEED=1.50 %command%
+    mangohud LD_PRELOAD="/home/usuario/.local/lib/zblz/libspeedhack.so${LD_PRELOAD:+:$LD_PRELOAD}" SPEED=1.50 %command%
 
     Con GameMode para mejor rendimiento:
-    gamemoderun LD_PRELOAD="/home/usuario/.local/lib/zblz/libspeedhack.so" SPEED=2.00 %command%
+    gamemoderun LD_PRELOAD="/home/usuario/.local/lib/zblz/libspeedhack.so${LD_PRELOAD:+:$LD_PRELOAD}" SPEED=2.00 %command%
 
 Escáner de Procesos
 
