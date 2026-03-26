@@ -7,6 +7,8 @@ for features like memory scanning, process attachment, etc.
 """
 
 import os
+import shlex
+import subprocess
 from typing import Optional, TYPE_CHECKING
 from models.app_state import AppState, ProcessInfo, SpeedHackMode
 from services.process_scanner import ProcessScanner
@@ -145,6 +147,71 @@ class MainController:
         parts.append("%command%")
 
         return " ".join(parts)
+
+    def launch_external_program(
+        self,
+        command: str,
+        include_mangohud: bool = False,
+        include_gamemode: bool = False,
+    ) -> tuple[bool, str]:
+        """
+        Launch a non-Steam program with speedhack preloaded.
+
+        Returns:
+            (success, user_message)
+        """
+        target_command = command.strip()
+        if not target_command:
+            return False, "Write a command first (path/to/program [args])"
+
+        library_path = self._model.library_path.strip()
+        if not library_path:
+            return False, "Speedhack library path is empty"
+
+        if not os.path.exists(library_path):
+            return False, f"Library not found: {library_path}"
+
+        try:
+            target_args = shlex.split(target_command)
+        except ValueError as e:
+            return False, f"Invalid command syntax: {e}"
+
+        if not target_args:
+            return False, "Invalid command"
+
+        launch_args = []
+        if include_gamemode:
+            launch_args.append("gamemoderun")
+        if include_mangohud:
+            launch_args.append("mangohud")
+        launch_args.extend(target_args)
+
+        env = os.environ.copy()
+        existing_preload = env.get("LD_PRELOAD", "").strip()
+        if existing_preload:
+            env["LD_PRELOAD"] = f"{library_path}:{existing_preload}"
+        else:
+            env["LD_PRELOAD"] = library_path
+
+        # Keep per-process config for non-Steam launches
+        env.pop("ZBLZ_PID", None)
+        env["SPEED"] = f"{self._model.speed_multiplier:.2f}"
+
+        try:
+            process = subprocess.Popen(
+                launch_args,
+                env=env,
+                start_new_session=True,
+            )
+        except FileNotFoundError:
+            return False, f"Command not found: {launch_args[0]}"
+        except Exception as e:
+            return False, f"Launch failed: {e}"
+
+        return (
+            True,
+            f"Launched PID {process.pid} with speedhack. Refresh and attach for real-time control.",
+        )
 
     # ==================== Process Management ====================
 

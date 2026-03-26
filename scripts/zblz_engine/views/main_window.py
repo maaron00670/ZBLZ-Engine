@@ -223,6 +223,9 @@ class MainWindow(QMainWindow):
         self._command_output.library_path_changed.connect(
             self._controller.set_library_path
         )
+        self._command_output.launch_external_requested.connect(
+            self._on_launch_external_program
+        )
     
     def _on_generate_command(self):
         """Handle generate command button click."""
@@ -236,7 +239,22 @@ class MainWindow(QMainWindow):
         
         self._command_output.set_command(command)
         self.show_status("Launch command generated")
-    
+
+    def _on_launch_external_program(self, command: str, include_mangohud: bool, include_gamemode: bool):
+        """Handle launch request for non-Steam program."""
+        success, message = self._controller.launch_external_program(
+            command,
+            include_mangohud=include_mangohud,
+            include_gamemode=include_gamemode
+        )
+
+        if success:
+            self.show_status(message, 8000)
+            # Show all user processes so the launched app is easy to find
+            self._controller.refresh_processes(games_only=False)
+        else:
+            self.show_error(message)
+
     # ==================== Public Methods for Controller ====================
     
     def update_speed_display(self, speed: float):
