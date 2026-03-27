@@ -1436,7 +1436,7 @@
                 <div>
                     <div class="step-label">
                         <div class="step-num-badge">1</div>
-                        Compilar la librería
+                        Clonar y compilar la librería
                     </div>
                     <div class="code-card">
                         <div class="code-header">
@@ -1448,13 +1448,13 @@
                             <span class="code-lang">BASH</span>
                         </div>
                         <div class="code-body">
-                            <span class="code-comment"># En la carpeta lib/</span><br>
-                            cd lib/<br>
+                            git clone https://github.com/maaron00670/ZBLZ-Engine<br>
+                            cd ZBLZ-Engine/scripts/zblz_engine/lib<br>
                             chmod +x build.sh<br>
                             ./build.sh install<br>
                             <br>
-                            <span class="code-comment"># Requiere: build-essential</span><br>
-                            <span class="code-comment"># Opcional: gcc-multilib (32 bits)</span>
+                            <span class="code-comment"># Requiere: sudo apt install build-essential</span><br>
+                            <span class="code-comment"># Opcional: sudo apt install gcc-multilib</span>
                         </div>
                     </div>
                 </div>
@@ -1475,7 +1475,7 @@
                         </div>
                         <div class="code-body">
                             cd scripts/zblz_engine<br>
-                            pip install -r requirements.txt<br>
+                            python -m pip install -r requirements.txt<br>
                             python main.py
                         </div>
                     </div>
