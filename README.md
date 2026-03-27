@@ -25,7 +25,7 @@ ZBLZ Engine utiliza `LD_PRELOAD` para inyectar una librería que intercepta las 
 
 ### 1. Compilar la librería Speedhack
 ```bash
-cd lib/
+cd scripts/zblz_engine/lib/
 chmod +x build.sh
 ./build.sh install
 
