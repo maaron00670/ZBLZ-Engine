@@ -23,28 +23,50 @@ ZBLZ Engine utiliza `LD_PRELOAD` para inyectar una librería que intercepta las 
 
 ## Inicio Rápido
 
-### 1. Compilar la librería Speedhack
+### 1. Clonar el repositorio
 ```bash
-cd lib/
+git clone https://github.com/maaron00670/ZBLZ-Engine
+```
+### 2. Compilar la libreria de speedhack
+
+```bash
+cd ZBLZ-Engine/scripts/zblz_engine/lib
 chmod +x build.sh
 ./build.sh install
-
+```
 Esto compila libspeedhack.so e instala la librería en ~/.local/lib/zblz/.
 
-Requisitos:
+### Requisitos:
 
     GCC: sudo apt install build-essential
 
     Opcional para juegos de 32 bits: sudo apt install gcc-multilib
 
-2. Ejecutar ZBLZ Engine
-Bash
+### 3. Ejecutar ZBLZ Engine 
 
-cd scripts/zblz_engine
+Varias opciones
+
+```bash
+cd ZBLZ-Engine/scripts/zblz_engine
 pip install -r requirements.txt
 python main.py
+```
 
-3. Usar con juegos de Steam
+```bash
+pipenv install -r requirements.txt
+pipenv run python main.py
+```
+
+```bash
+cd ZBLZ-Engine/scripts/zblz_engine
+python -m pip install -r requirements.txt
+python main.py
+
+```
+
+Estas son algunas opciones , eres libre de instalarlas como quieras
+
+### 3. Usar con juegos de Steam
 
     En ZBLZ Engine, ajusta el deslizador de velocidad (por ejemplo, 2.0x para doble velocidad).
 
@@ -56,7 +78,7 @@ python main.py
 
     ¡Lanza el juego y se ejecutará a la velocidad modificada!
 
-Ejemplos de comandos:
+### Ejemplos de comandos:
 
     Doble velocidad:
     LD_PRELOAD="/home/usuario/.local/lib/zblz/libspeedhack.so${LD_PRELOAD:+:$LD_PRELOAD}" SPEED=2.00 %command%
@@ -70,7 +92,7 @@ Ejemplos de comandos:
     Con GameMode para mejor rendimiento:
     gamemoderun LD_PRELOAD="/home/usuario/.local/lib/zblz/libspeedhack.so${LD_PRELOAD:+:$LD_PRELOAD}" SPEED=2.00 %command%
 
-Escáner de Procesos
+### Escáner de Procesos
 
 La lista de procesos muestra juegos de Wine/Proton/Steam en ejecución:
 
@@ -82,8 +104,8 @@ La lista de procesos muestra juegos de Wine/Proton/Steam en ejecución:
 
     Nota: La función de adjuntar a procesos para controlar la velocidad en tiempo real está planeada para una actualización futura.
 
-Estructura del Proyecto
-Plaintext
+### Estructura del Proyecto
+```Plaintext
 
 zblz_engine/
 ├── main.py                    # Punto de entrada de la aplicación
@@ -106,14 +128,19 @@ zblz_engine/
 └── services/
     └── process_scanner.py     # Escáner del sistema de archivos /proc
 
-Solución de Problemas
+```
+### Solución de Problemas
+```bash
 Error "Library not found"
+```
 
 Asegúrate de haber compilado e instalado la librería:
-Bash
+```Bash
 
 cd lib/
 ./build.sh install
+
+```
 
 El juego se cierra o no cambia de velocidad
 
@@ -134,7 +161,7 @@ La velocidad parece inconsistente
 
     Algunos juegos limitan su tasa interna de ticks.
 
-Cómo funciona el Speedhack
+### Cómo funciona el Speedhack
 
 La librería libspeedhack.so utiliza LD_PRELOAD para interceptar las siguientes funciones:
 Función	Propósito
@@ -163,6 +190,6 @@ Funciones Futuras
 
     Soporte completo para procesos de 32 bits.
 
-Licencia
+### Licencia
 
 Licencia MIT - Gratuito para uso personal.
