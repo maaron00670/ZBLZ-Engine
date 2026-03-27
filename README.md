@@ -1,195 +1,168 @@
-# IMPORTANTE ⚠️⚠️
-Soy inexperto y para hacer este proyecto posible me estoy ayudando de IA,
-cualquier uso que hagas de este programa es bajo tu propio riesgo.
-
-Yo estoy realizando este programa con fines de aprender y uso personal 
-
 # ZBLZ Engine
-Herramienta de Manipulación de Velocidad de Juegos en Linux - Similar a la función speedhack de Cheat Engine.
+Herramienta para manipular la velocidad de juegos en Linux, inspirada en la función Speedhack de Cheat Engine.
 
-## Cómo funciona
-ZBLZ Engine utiliza `LD_PRELOAD` para inyectar una librería que intercepta las llamadas al sistema relacionadas con el tiempo (`clock_gettime`, `gettimeofday`, `nanosleep`, etc.) y las modifica para acelerar o ralentizar el tiempo del juego.
+## Aviso importante
+Este proyecto está hecho con fines de aprendizaje y uso personal.
 
-### Dos modos de operación:
+El autor se apoya en IA para su desarrollo y no garantiza su funcionamiento en todos los entornos. Cualquier uso que hagas de este programa es bajo tu propia responsabilidad.
 
-1. **Opciones de lanzamiento de Steam** (Actual)
-   - Genera un comando y lo pegas en las propiedades del juego en Steam.
-   - Funciona con cualquier juego, incluyendo juegos de Proton/Wine.
-   - La velocidad se fija al momento de lanzar el juego.
+## Qué hace
+ZBLZ Engine usa `LD_PRELOAD` para inyectar una librería (`libspeedhack.so`) que intercepta llamadas de tiempo del sistema, por ejemplo:
 
-2. **Adjuntar a proceso** (Futuro)
-   - Adjuntarse a juegos que ya están en ejecución.
-   - Cambiar la velocidad en tiempo real.
+- `clock_gettime`
+- `gettimeofday`
+- `nanosleep`
+- `usleep`
+- `sleep`
 
-## Inicio Rápido
+Con esto, el juego percibe que el tiempo pasa más rápido o más lento.
 
+## Modos de operación
+1. **Opciones de lanzamiento de Steam (actual)**
+   - Genera un comando para pegar en Steam.
+   - Compatible con juegos nativos, Proton y Wine.
+   - La velocidad queda fijada al iniciar el juego.
+
+2. **Adjuntar a proceso (futuro)**
+   - Permitiría engancharse a procesos ya abiertos.
+   - Objetivo: cambiar la velocidad en tiempo real.
+
+## Requisitos
+- Linux
+- `gcc` (compilación de la librería)
+- Python 3 + `pip`
+- Opcional (juegos de 32 bits): `gcc-multilib`
+
+Instalación de dependencias base en Debian/Ubuntu:
+
+```bash
+sudo apt install build-essential
+# opcional para 32 bits
+sudo apt install gcc-multilib
+```
+
+## Inicio rápido
 ### 1. Clonar el repositorio
 ```bash
 git clone https://github.com/maaron00670/ZBLZ-Engine
+cd ZBLZ-Engine
 ```
-### 2. Compilar la libreria de speedhack
 
+### 2. Compilar e instalar la librería
 ```bash
-cd ZBLZ-Engine/scripts/zblz_engine/lib
+cd scripts/zblz_engine/lib
 chmod +x build.sh
 ./build.sh install
 ```
-Esto compila libspeedhack.so e instala la librería en ~/.local/lib/zblz/.
 
-### Requisitos:
+Esto compila `libspeedhack.so` e instala la librería en `~/.local/lib/zblz/`.
 
-    GCC: sudo apt install build-essential
-
-    Opcional para juegos de 32 bits: sudo apt install gcc-multilib
-
-### 3. Ejecutar ZBLZ Engine 
-
-Varias opciones
+### 3. Ejecutar la aplicación
+Desde la raíz del repo:
 
 ```bash
-cd ZBLZ-Engine/scripts/zblz_engine
-pip install -r requirements.txt
+cd scripts/zblz_engine
+python -m pip install -r requirements.txt
 python main.py
 ```
 
+Alternativa con `pipenv`:
+
 ```bash
+cd scripts/zblz_engine
 pipenv install -r requirements.txt
 pipenv run python main.py
 ```
 
-```bash
-cd ZBLZ-Engine/scripts/zblz_engine
-python -m pip install -r requirements.txt
-python main.py
+## Uso con Steam
+1. Ajusta el deslizador de velocidad en ZBLZ Engine (por ejemplo, `2.0x`).
+2. Haz clic en **Generar Comando**.
+3. En Steam: clic derecho sobre el juego -> **Propiedades** -> **Opciones de lanzamiento**.
+4. Pega el comando generado.
+5. Inicia el juego.
 
+## Ejemplos de comandos
+```bash
+# Doble velocidad
+LD_PRELOAD="/home/usuario/.local/lib/zblz/libspeedhack.so${LD_PRELOAD:+:$LD_PRELOAD}" SPEED=2.00 %command%
+
+# Media velocidad (cámara lenta)
+LD_PRELOAD="/home/usuario/.local/lib/zblz/libspeedhack.so${LD_PRELOAD:+:$LD_PRELOAD}" SPEED=0.50 %command%
+
+# Con MangoHud
+mangohud LD_PRELOAD="/home/usuario/.local/lib/zblz/libspeedhack.so${LD_PRELOAD:+:$LD_PRELOAD}" SPEED=1.50 %command%
+
+# Con GameMode
+gamemoderun LD_PRELOAD="/home/usuario/.local/lib/zblz/libspeedhack.so${LD_PRELOAD:+:$LD_PRELOAD}" SPEED=2.00 %command%
 ```
 
-Estas son algunas opciones , eres libre de instalarlas como quieras
+## Escáner de procesos
+La lista de procesos permite ver juegos/procesos en ejecución.
 
-### 3. Usar con juegos de Steam
+- Pulsa **Actualizar** para reescanear.
+- Activa **Solo juegos** para filtrar procesos.
+- Selecciona un proceso para ver detalles.
 
-    En ZBLZ Engine, ajusta el deslizador de velocidad (por ejemplo, 2.0x para doble velocidad).
+Nota: el control en tiempo real sobre procesos ya abiertos todavía no está implementado.
 
-    Haz clic en "Generar Comando" para crear la opción de lanzamiento.
-
-    En Steam: Botón derecho sobre el juego → Propiedades → Opciones de lanzamiento.
-
-    Pega el comando generado.
-
-    ¡Lanza el juego y se ejecutará a la velocidad modificada!
-
-### Ejemplos de comandos:
-
-    Doble velocidad:
-    LD_PRELOAD="/home/usuario/.local/lib/zblz/libspeedhack.so${LD_PRELOAD:+:$LD_PRELOAD}" SPEED=2.00 %command%
-
-    Media velocidad (cámara lenta):
-    LD_PRELOAD="/home/usuario/.local/lib/zblz/libspeedhack.so${LD_PRELOAD:+:$LD_PRELOAD}" SPEED=0.50 %command%
-
-    Con overlay de MangoHud:
-    mangohud LD_PRELOAD="/home/usuario/.local/lib/zblz/libspeedhack.so${LD_PRELOAD:+:$LD_PRELOAD}" SPEED=1.50 %command%
-
-    Con GameMode para mejor rendimiento:
-    gamemoderun LD_PRELOAD="/home/usuario/.local/lib/zblz/libspeedhack.so${LD_PRELOAD:+:$LD_PRELOAD}" SPEED=2.00 %command%
-
-### Escáner de Procesos
-
-La lista de procesos muestra juegos de Wine/Proton/Steam en ejecución:
-
-    Haz clic en "Actualizar" para escanear juegos en ejecución.
-
-    Activa "Solo juegos" para ver solo procesos de juegos o todos los procesos.
-
-    Selecciona un proceso para ver sus detalles.
-
-    Nota: La función de adjuntar a procesos para controlar la velocidad en tiempo real está planeada para una actualización futura.
-
-### Estructura del Proyecto
-```Plaintext
-
-zblz_engine/
-├── main.py                    # Punto de entrada de la aplicación
-├── requirements.txt           # Dependencias de Python
+## Estructura del proyecto
+```text
+scripts/zblz_engine/
+├── main.py
+├── requirements.txt
 ├── lib/
-│   ├── speedhack.c            # Código fuente de la librería en C
-│   ├── build.sh               # Script de compilación
-│   └── libspeedhack.so        # Librería compilada (después de compilar)
+│   ├── speedhack.c
+│   ├── build.sh
+│   └── libspeedhack.so
 ├── models/
-│   └── app_state.py           # Estado de la aplicación (modelo MVC)
+│   └── app_state.py
 ├── views/
-│   ├── main_window.py         # Ventana principal
-│   ├── styles.py              # Estilos del tema oscuro
+│   ├── main_window.py
+│   ├── styles.py
 │   └── widgets/
-│       ├── speed_control.py   # Widget del deslizador de velocidad
-│       ├── process_list.py    # Widget del escáner de procesos
-│       └── command_output.py  # Widget del generador de comandos
+│       ├── speed_control.py
+│       ├── process_list.py
+│       └── command_output.py
 ├── controllers/
-│   └── main_controller.py     # Lógica de negocio (controlador MVC)
+│   └── main_controller.py
 └── services/
-    └── process_scanner.py     # Escáner del sistema de archivos /proc
-
+    └── process_scanner.py
 ```
-### Solución de Problemas
+
+## Solución de problemas
+### Error: "Library not found"
+Comprueba que compilaste e instalaste la librería:
+
 ```bash
-Error "Library not found"
-```
-
-Asegúrate de haber compilado e instalado la librería:
-```Bash
-
-cd lib/
+cd scripts/zblz_engine/lib
 ./build.sh install
-
 ```
 
-El juego se cierra o no cambia de velocidad
+### El juego se cierra o no cambia de velocidad
+- Algunos juegos usan temporizadores que no están interceptados.
+- Algunos anti-cheat bloquean `LD_PRELOAD`.
+- En juegos antiguos, prueba soporte 32/64 bits según corresponda.
 
-    Algunos juegos usan métodos de temporización diferentes que pueden no ser interceptados.
+### "Permission denied" al escanear procesos
+Es normal en procesos del sistema que requieren permisos elevados.
 
-    Los sistemas anti-cheat pueden bloquear LD_PRELOAD.
+### Velocidad inconsistente
+- Algunos juegos vinculan la física a FPS.
+- En juegos online, el servidor puede forzar sincronización temporal.
+- Algunos motores limitan internamente sus ticks.
 
-    Prueba tanto la versión de 32 bits como la de 64 bits para juegos antiguos.
+## Fórmula base del speedhack
+- Tiempo modificado:
+  `tiempo_modificado = tiempo_inicial + (tiempo_transcurrido * multiplicador_velocidad)`
+- Sleep modificado (aproximación):
+  `sleep_modificado = sleep_original / multiplicador_velocidad`
 
-"Permission denied" al escanear procesos
+## Roadmap
+- Adjuntar a procesos en tiempo real con `ptrace`.
+- Escaneo de memoria (tipo Cheat Engine).
+- Hotkeys para cambiar velocidad.
+- Perfiles de velocidad por juego.
+- Mejor soporte para procesos de 32 bits.
 
-Algunos procesos requieren permisos de root para leerlos. Esto es normal en procesos del sistema.
-La velocidad parece inconsistente
-
-    Los juegos basados en física pueden tener física dependiente de la tasa de frames.
-
-    Los juegos en línea pueden sincronizarse con el tiempo del servidor.
-
-    Algunos juegos limitan su tasa interna de ticks.
-
-### Cómo funciona el Speedhack
-
-La librería libspeedhack.so utiliza LD_PRELOAD para interceptar las siguientes funciones:
-Función	Propósito
-clock_gettime()	Función principal de temporización (CLOCK_MONOTONIC, CLOCK_REALTIME)
-gettimeofday()	Función de temporización antigua
-nanosleep()	Función de sleep (ajustada inversamente)
-usleep()	Sleep en microsegundos
-sleep()	Sleep en segundos
-
-Fórmula de modificación del tiempo:
-tiempo_modificado=tiempo_inicial+(tiempo_transcurrido×multiplicador_velocidad)
-
-Modificación del sleep:
-sleep_modificado=multiplicador_velocidadsleep_original​
-
-Esto hace que el juego "crea" que el tiempo pasa más rápido o más lento mientras mantiene una ejecución fluida.
-Funciones Futuras
-
-    Adjuntar a procesos en tiempo real con ptrace.
-
-    Escaneo de memoria (como Cheat Engine).
-
-    Soporte de teclas rápidas (hotkeys) para cambiar velocidad.
-
-    Guardar/cargar perfiles de velocidad por juego.
-
-    Soporte completo para procesos de 32 bits.
-
-### Licencia
-
-Licencia MIT - Gratuito para uso personal.
+## Licencia
+MIT.
