@@ -165,4 +165,4 @@ Es normal en procesos del sistema que requieren permisos elevados.
 - Mejor soporte para procesos de 32 bits.
 
 ## Licencia
-MIT.
+MIT. Gratis para uso personal (bajo tu propio riesgo).
