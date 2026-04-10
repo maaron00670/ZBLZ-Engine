@@ -3,7 +3,8 @@ Herramienta para manipular la velocidad de juegos en Linux, inspirada en la func
 
 Versión actual: **V 0.1.1**
 
-## Uso para usuarios finales (sin instalar dependencias)
+## Uso para usuarios finales (sin instalar dependencias)  ACTUALMENTE NO FUNCIONANDO, APPIMAGE POR ARREGLAR
+
 La forma recomendada para terceros es usar la versión **AppImage** publicada en Releases.
 
 Pasos:
