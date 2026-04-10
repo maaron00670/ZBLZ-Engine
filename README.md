@@ -1,6 +1,20 @@
 # ZBLZ Engine
 Herramienta para manipular la velocidad de juegos en Linux, inspirada en la función Speedhack de Cheat Engine.
 
+Versión actual: **V 0.1.1**
+
+## Uso para usuarios finales (sin instalar dependencias)
+La forma recomendada para terceros es usar la versión **AppImage** publicada en Releases.
+
+Pasos:
+
+```bash
+chmod +x ZBLZ-Engine-*.AppImage
+./ZBLZ-Engine-*.AppImage
+```
+
+Con esto no necesitan instalar Python, pip ni dependencias del proyecto.
+
 ## Aviso importante
 Este proyecto está hecho con fines de aprendizaje y uso personal.
 
@@ -31,6 +45,7 @@ Con esto, el juego percibe que el tiempo pasa más rápido o más lento.
 - Linux
 - `gcc` (compilación de la librería)
 - Python 3 + `pip`
+- `pynput` (hotkeys globales)
 - Opcional (juegos de 32 bits): `gcc-multilib`
 
 Instalación de dependencias base en Debian/Ubuntu:
@@ -61,9 +76,11 @@ Esto compila `libspeedhack.so` e instala la librería en `~/.local/lib/zblz/`.
 Desde la raíz del repo:
 
 ```bash
-cd scripts/zblz_engine
-python -m pip install -r requirements.txt
-python main.py
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r scripts/zblz_engine/requirements.txt
+python scripts/zblz_engine/main.py
 ```
 
 Alternativa con `pipenv`:
@@ -73,6 +90,48 @@ cd scripts/zblz_engine
 pipenv install -r requirements.txt
 pipenv run python main.py
 ```
+
+## Empaquetado AppImage (maintainers)
+Este repositorio incluye build automático de AppImage en:
+
+- `.github/workflows/release-appimage.yml`
+- `scripts/package/build_appimage.sh`
+
+Generación local:
+
+```bash
+chmod +x scripts/package/build_appimage.sh
+scripts/package/build_appimage.sh
+```
+
+Salida esperada:
+
+```bash
+dist/ZBLZ-Engine-<version>-<arch>.AppImage
+```
+
+Publicación automática:
+
+- Al crear un tag `v*` o un release en GitHub, el workflow compila y sube el AppImage.
+
+## Hotkeys globales (pynput)
+Para que los hotkeys funcionen en Linux:
+
+```bash
+cd /ruta/a/ZBLZ-Engine
+source .venv/bin/activate
+python -m pip install -r scripts/zblz_engine/requirements.txt
+python -c "import pynput; print(pynput.__version__)"
+```
+
+Comprobación recomendada de sesión gráfica:
+
+```bash
+echo $XDG_SESSION_TYPE
+```
+
+- Si devuelve `x11`, los hotkeys globales deberían funcionar normalmente.
+- Si devuelve `wayland`, `pynput` puede tener limitaciones para capturar teclas globales. En ese caso, prueba iniciando sesión en X11.
 
 ## Uso con Steam
 1. Ajusta el deslizador de velocidad en ZBLZ Engine (por ejemplo, `2.0x`).
@@ -160,7 +219,6 @@ Es normal en procesos del sistema que requieren permisos elevados.
 ## Roadmap
 - Adjuntar a procesos en tiempo real con `ptrace`.
 - Escaneo de memoria (tipo Cheat Engine).
-- Hotkeys para cambiar velocidad.
 - Perfiles de velocidad por juego.
 - Mejor soporte para procesos de 32 bits.
 

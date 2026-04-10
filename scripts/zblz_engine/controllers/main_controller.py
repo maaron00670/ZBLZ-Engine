@@ -9,6 +9,7 @@ for features like memory scanning, process attachment, etc.
 import os
 import shlex
 import subprocess
+import sys
 from typing import Optional, TYPE_CHECKING
 from models.app_state import AppState, ProcessInfo, SpeedHackMode
 from services.process_scanner import ProcessScanner
@@ -47,7 +48,15 @@ class MainController:
 
     def _set_default_library_path(self) -> None:
         """Set the default speedhack library path."""
+        env_library = os.environ.get("ZBLZ_LIBRARY_PATH")
+        if env_library and os.path.exists(env_library):
+            self._model.library_path = env_library
+            return
+
+        executable_dir = os.path.dirname(os.path.abspath(sys.executable))
         possible_paths = [
+            os.path.join(executable_dir, "..", "lib", "zblz", "libspeedhack.so"),
+            os.path.join(executable_dir, "lib", "zblz", "libspeedhack.so"),
             os.path.expanduser("~/.local/lib/zblz/libspeedhack.so"),
             os.path.join(os.path.dirname(os.path.dirname(__file__)), "lib", "libspeedhack.so"),
             "/usr/local/lib/zblz/libspeedhack.so",

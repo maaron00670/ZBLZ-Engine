@@ -1331,6 +1331,7 @@
                     <div class="hero-check"><i class="fas fa-check-circle"></i> Funciona con Proton y Wine</div>
                     <div class="hero-check"><i class="fas fa-check-circle"></i> Opciones de lanzamiento de Steam</div>
                     <div class="hero-check"><i class="fas fa-check-circle"></i> Escáner de procesos incluido</div>
+                    <div class="hero-check"><i class="fas fa-check-circle"></i> Hotkeys globales con pynput</div>
                     <div class="hero-check"><i class="fas fa-check-circle"></i> Sin anticheat (solo offline)</div>
                 </div>
             </div>
@@ -1339,7 +1340,7 @@
             <div style="position:relative">
                 <div class="hero-card">
                     <div class="card-header">
-                        <span class="card-title">ZBLZ ENGINE &nbsp;·&nbsp; v1.0</span>
+                        <span class="card-title">ZBLZ ENGINE &nbsp;·&nbsp; V 0.1.1</span>
                         <div class="status-live">
                             <div class="status-dot"></div>
                             EN EJECUCIÓN
@@ -1432,6 +1433,31 @@
                 <h2 class="section-title">Inicio Rápido</h2>
             </div>
 
+            <div class="steam-box" style="margin-top:2.5rem">
+                <div class="step-label">
+                    <div class="step-num-badge">0</div>
+                    Uso recomendado para cualquier usuario: AppImage
+                </div>
+                <p style="font-size:0.88rem; color:#7A6A9A; margin-bottom:0.8rem">
+                    Descarga el archivo AppImage desde Releases y ejecútalo con doble clic o terminal.
+                    No necesitas instalar Python ni dependencias del proyecto.
+                </p>
+                <div class="code-card">
+                    <div class="code-header">
+                        <div class="code-dots">
+                            <div class="dot dot-red"></div>
+                            <div class="dot dot-yellow"></div>
+                            <div class="dot dot-green"></div>
+                        </div>
+                        <span class="code-lang">BASH</span>
+                    </div>
+                    <div class="code-body">
+                        chmod +x ZBLZ-Engine-*.AppImage<br>
+                        ./ZBLZ-Engine-*.AppImage
+                    </div>
+                </div>
+            </div>
+
             <div class="quickstart-grid">
                 <div>
                     <div class="step-label">
@@ -1474,9 +1500,11 @@
                             <span class="code-lang">BASH</span>
                         </div>
                         <div class="code-body">
-                            cd scripts/zblz_engine<br>
-                            python -m pip install -r requirements.txt<br>
-                            python main.py
+                            python3 -m venv .venv<br>
+                            source .venv/bin/activate<br>
+                            python -m pip install --upgrade pip<br>
+                            python -m pip install -r scripts/zblz_engine/requirements.txt<br>
+                            python scripts/zblz_engine/main.py
                         </div>
                     </div>
                 </div>
@@ -1499,6 +1527,35 @@
                     <div class="example-card">
                         <div class="label">🐢 Cámara lenta</div>
                         <code>LD_PRELOAD="/home/usuario/.local/lib/zblz/libspeedhack.so${LD_PRELOAD:+:$LD_PRELOAD}" SPEED=0.50 %command%</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="steam-box">
+                <div class="step-label">
+                    <div class="step-num-badge">4</div>
+                    Activar hotkeys globales
+                </div>
+                <p style="font-size:0.88rem; color:#7A6A9A; margin-bottom:0.8rem">
+                    El proyecto ya incluye <strong style="color:#C4B3E0">pynput</strong> en dependencias.
+                    Si no funcionan los hotkeys, revisa el tipo de sesión gráfica.
+                </p>
+                <div class="code-card">
+                    <div class="code-header">
+                        <div class="code-dots">
+                            <div class="dot dot-red"></div>
+                            <div class="dot dot-yellow"></div>
+                            <div class="dot dot-green"></div>
+                        </div>
+                        <span class="code-lang">BASH</span>
+                    </div>
+                    <div class="code-body">
+                        source .venv/bin/activate<br>
+                        python -m pip install -r scripts/zblz_engine/requirements.txt<br>
+                        python -c "import pynput; print(pynput.__version__)"<br>
+                        echo $XDG_SESSION_TYPE<br>
+                        <br>
+                        <span class="code-comment"># Recomendado: X11 para hotkeys globales fiables</span>
                     </div>
                 </div>
             </div>
@@ -1622,8 +1679,8 @@
                 <div class="roadmap-item todo fade-up">
                     <div class="roadmap-icon">📋</div>
                     <div>
-                        <h4>Hotkeys · Perfiles por juego · Escaneo de memoria</h4>
-                        <p>Atajos de teclado globales, configuraciones guardadas por juego y explorador de memoria.</p>
+                        <h4>Perfiles por juego · Escaneo de memoria</h4>
+                        <p>Configuraciones guardadas por juego y explorador de memoria tipo Cheat Engine.</p>
                     </div>
                     <span class="roadmap-status status-todo">PRÓXIMAMENTE</span>
                 </div>
