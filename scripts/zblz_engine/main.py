@@ -30,6 +30,9 @@ def main():
     
     # Connect controller to view for updates
     controller.set_view(view)
+
+    # Stop global hotkey listener when the application exits
+    app.aboutToQuit.connect(controller.hotkey_manager.stop)
     
     view.show()
     sys.exit(app.exec_())

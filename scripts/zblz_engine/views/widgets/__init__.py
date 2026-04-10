@@ -4,9 +4,11 @@
 from .speed_control import SpeedControlWidget
 from .process_list import ProcessListWidget
 from .command_output import CommandOutputWidget
+from .hotkeys import HotkeysWidget
 
 __all__ = [
     "SpeedControlWidget",
-    "ProcessListWidget", 
+    "ProcessListWidget",
     "CommandOutputWidget",
+    "HotkeysWidget",
 ]
