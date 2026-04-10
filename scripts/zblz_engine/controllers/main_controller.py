@@ -13,6 +13,7 @@ from typing import Optional, TYPE_CHECKING
 from models.app_state import AppState, ProcessInfo, SpeedHackMode
 from services.process_scanner import ProcessScanner
 from services.speed_controller import SpeedController
+from services.hotkey_manager import HotkeyManager
 
 if TYPE_CHECKING:
     from views.main_window import MainWindow
@@ -36,6 +37,7 @@ class MainController:
         # Initialize services
         self._process_scanner = ProcessScanner()
         self._speed_controller = SpeedController()
+        self._hotkey_manager = HotkeyManager()
 
         # Set default library path
         self._set_default_library_path()
@@ -62,6 +64,11 @@ class MainController:
     def set_view(self, view: "MainWindow") -> None:
         """Connect the view to this controller."""
         self._view = view
+
+    @property
+    def hotkey_manager(self) -> HotkeyManager:
+        """Access the global hotkey manager."""
+        return self._hotkey_manager
 
     @property
     def model(self) -> AppState:
@@ -98,6 +105,18 @@ class MainController:
     def get_speed(self) -> float:
         """Get the current speed multiplier."""
         return self._model.speed_multiplier
+
+    def increase_speed(self) -> None:
+        """Increase the speed multiplier by 1.0."""
+        self.set_speed(self._model.speed_multiplier + 1.0)
+
+    def reset_speed(self) -> None:
+        """Reset the speed multiplier to 1.0."""
+        self.set_speed(1.0)
+
+    def decrease_speed(self) -> None:
+        """Decrease the speed multiplier by 1.0 (clamped to minimum by the model)."""
+        self.set_speed(self._model.speed_multiplier - 1.0)
 
     def set_library_path(self, path: str) -> None:
         """Update the speedhack library path."""

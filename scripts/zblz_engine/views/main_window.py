@@ -13,7 +13,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 
 from views.styles import DARK_THEME
-from views.widgets import SpeedControlWidget, ProcessListWidget, CommandOutputWidget
+from views.widgets import SpeedControlWidget, ProcessListWidget, CommandOutputWidget, HotkeysWidget
 
 if TYPE_CHECKING:
     from controllers.main_controller import MainController
@@ -142,7 +142,11 @@ class MainWindow(QMainWindow):
         # Speed control widget
         self._speed_control = SpeedControlWidget()
         right_layout.addWidget(self._speed_control)
-        
+
+        # Hotkeys widget
+        self._hotkeys = HotkeysWidget(self._controller.hotkey_manager)
+        right_layout.addWidget(self._hotkeys)
+
         # Command output widget
         self._command_output = CommandOutputWidget()
         right_layout.addWidget(self._command_output)
@@ -201,7 +205,12 @@ class MainWindow(QMainWindow):
         self._speed_control.speed_changed.connect(
             self._controller.set_speed
         )
-        
+
+        # Hotkeys
+        self._hotkeys.increase_requested.connect(self._controller.increase_speed)
+        self._hotkeys.reset_requested.connect(self._controller.reset_speed)
+        self._hotkeys.decrease_requested.connect(self._controller.decrease_speed)
+
         # Process list
         self._process_list.refresh_requested.connect(
             lambda games_only: self._controller.refresh_processes(games_only)
