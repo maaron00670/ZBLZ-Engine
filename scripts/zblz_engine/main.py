@@ -21,7 +21,7 @@ def main():
     
     app = QApplication(sys.argv)
     app.setApplicationName("ZBLZ Engine")
-    app.setApplicationVersion("0.1.0")
+    app.setApplicationVersion("0.1.1")
     
     # Initialize MVC components
     model = AppState()

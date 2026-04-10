@@ -111,7 +111,7 @@ class MainWindow(QMainWindow):
         layout.addStretch()
         
         # Version
-        version = QLabel("v0.1.0")
+        version = QLabel("V 0.1.1")
         version.setObjectName("subtitle")
         layout.addWidget(version)
         
