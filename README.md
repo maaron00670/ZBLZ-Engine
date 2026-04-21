@@ -1,3 +1,6 @@
+# DESAROLLOEN PAUSA
+
+
 # ZBLZ Engine
 Herramienta para manipular la velocidad de juegos en Linux, inspirada en la función Speedhack de Cheat Engine.
 
